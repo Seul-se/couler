@@ -30,6 +30,9 @@ public class RPCClient<R,T> implements Config<T> {
     private int aviableSize;
     private Timer t = new Timer();
 
+    public Config<T> getConfig(){
+        return this;
+    }
 
     public Schema<T> getSchema(){
         return rspSchema;
@@ -93,8 +96,20 @@ public class RPCClient<R,T> implements Config<T> {
                             Logger.info("重连[" + i + "]成功:" + host + ":" + port );
                             aviable.add(i);
                             aviableSize = aviable.size();
+                            if(socketReaders[i]==null){
+                                socketReaders[i] = new ClientSocketReader<T>(getConfig());
+                            }
                             socketReaders[i].init(connections[i]);
+                            if(!socketReaders[i].isAlive()){
+                                socketReaders[i].start();
+                            }
+                            if(socketWriters[i]==null){
+                                socketWriters[i] = new SocketWriter<T>(getConfig());
+                            }
                             socketWriters[i].init(connections[i]);
+                            if(!socketWriters[i].isAlive()){
+                                socketWriters[i].start();
+                            }
                         } catch (Exception e) {
                             Logger.error("连接" + i + "重连失败异常:" + host + ":" + port ,e);
                         }
