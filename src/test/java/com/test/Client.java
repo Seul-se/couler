@@ -6,14 +6,14 @@ import java.io.IOException;
 
 public class Client {
     public static void main(String[] args) {
-        RPCClient<Message,Message> client = new RPCClient<Message,Message>("127.0.0.1",9004,Message.class,Message.class,5);
+        RPCClient<RequestPojo, ResponsePojo> client = new RPCClient<RequestPojo, ResponsePojo>("127.0.0.1",9004, RequestPojo.class, ResponsePojo.class,5);
         client.open();
-        Message message = new Message();
+        RequestPojo message = new RequestPojo();
         message.setName("123");
         message.setId(100);
         message.setB("456".getBytes());
         try {
-            System.out.println(client.call(message,10000).getName());
+            System.out.println(client.call(message,10000).getCode());
         } catch (IOException e) {
             e.printStackTrace();
         }

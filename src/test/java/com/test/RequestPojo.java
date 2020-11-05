@@ -1,6 +1,6 @@
 package com.test;
 
-public class Message {
+public class RequestPojo {
 
     int id;
 

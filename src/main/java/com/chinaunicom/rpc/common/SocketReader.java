@@ -91,9 +91,9 @@ public class SocketReader<T> extends Thread{
     }
 
     protected Long readId(){
-        byte[] bytes = new byte[8];
         try {
-            if (in.read(bytes) != -1) {//TODO TEST
+            byte[] bytes = readBytes(in,8);
+            if (bytes!=null) {
                 return Byte2Int.byteArrayToLong(bytes);
             }
         }catch (SocketException e){
@@ -117,11 +117,8 @@ public class SocketReader<T> extends Thread{
     }
 
     protected byte[] readData(int length){
-        byte[] bytes = new byte[length];
         try {
-            if(in.read(bytes)!=-1){
-                return bytes;
-            }
+            return readBytes(in,length);
         }catch (SocketException e){
             Logger.info("Socket读取线程关闭:" + e.getMessage());
             try {
@@ -196,5 +193,18 @@ public class SocketReader<T> extends Thread{
                 Logger.error("Socket读取线程异常", e);
             }
         }
+    }
+
+    private byte[] readBytes(InputStream in,int length) throws IOException {
+        byte[] bytes = new byte[length];
+        int len = 0;
+        while (len < length) {
+            int tmp = in.read(bytes, len, length - len);
+            if(tmp == -1){
+                return null;
+            }
+            len = len + tmp;
+        }
+        return bytes;
     }
 }

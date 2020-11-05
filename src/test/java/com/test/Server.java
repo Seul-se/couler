@@ -4,10 +4,10 @@ import com.chinaunicom.rpc.RPCServer;
 
 import java.io.IOException;
 
-public class Main {
+public class Server {
     public static void main(String[] args) {
 
-        RPCServer server = new RPCServer(9004,Message.class,Message.class,200,new MyProcessor());
+        RPCServer<RequestPojo, ResponsePojo> server = new RPCServer<RequestPojo, ResponsePojo>(9006, RequestPojo.class, ResponsePojo.class,200,new MyProcessor());
         try {
             server.open();
         } catch (IOException e) {

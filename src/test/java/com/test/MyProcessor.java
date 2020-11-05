@@ -2,10 +2,11 @@ package com.test;
 
 import com.chinaunicom.rpc.intf.Processor;
 
-public class MyProcessor implements Processor<Message,Message> {
-    public Message process(Message req) {
-        req.setId(req.getId() +10);
-        req.setName("server" + req.getName());
-        return req;
+public class MyProcessor implements Processor<RequestPojo, ResponsePojo> {
+    public ResponsePojo process(RequestPojo req) {
+        ResponsePojo rsp = new ResponsePojo();
+        rsp.setCode("server" + req.getName());
+        rsp.setRsp(req.getB());
+        return rsp;
     }
 }
