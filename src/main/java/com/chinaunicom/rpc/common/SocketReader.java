@@ -11,7 +11,7 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class SocketReader<T> extends Thread{
+public abstract class SocketReader<T> extends Thread{
 
 
     private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
@@ -27,30 +27,7 @@ public class SocketReader<T> extends Thread{
     }
 
     public void run(){
-        while (run){
-            if(socket.isConnected()&&!socket.isClosed()) {
-                readHead();
-                Long id = readId();
-                if (id == null) {
-                    continue;
-                }
-                int length = readLength();
-                if (length == -1) {
-                    continue;
-                }
-                byte[] data = readData(length);
-                if (data == null) {
-                    continue;
-                }
-                T result = ProtostuffUtils.deserialize(data, config.getSchema());
-            }else{
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Logger.error("Socket读取线程异常", e);
-                }
-            }
-        }
+
     }
 
     protected void readHead(){
