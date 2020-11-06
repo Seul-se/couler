@@ -19,34 +19,28 @@ public class ServerSocketReader<R>  extends SocketReader<R>{
     }
 
     public void run(){
-        while (run) {
-            if (socket.isConnected() && !socket.isClosed()) {
-                try {
-                    readHead();
-                    Long id = readId();
-                    if (id == null) {
-                        continue;
-                    }
-                    int length = readLength();
-                    if (length == -1) {
-                        continue;
-                    }
-                    byte[] data = readData(length);
-                    if (data == null) {
-                        continue;
-                    }
-                    R result = ProtostuffUtils.deserialize(data, config.getSchema());
-                    server.putTask(new Task<R>(id, result, serverThread));
-                }catch (Exception e){
-                    Logger.error("Socket读取线程异常", e);
+        while (run&&socket.isConnected() && !socket.isClosed()) {
+            try {
+                readHead();
+                Long id = readId();
+                if (id == null) {
+                    continue;
                 }
-            }else{
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    Logger.error("Socket读取线程异常", e);
+                int length = readLength();
+                if (length == -1) {
+                    continue;
                 }
+                byte[] data = readData(length);
+                if (data == null) {
+                    continue;
+                }
+                R result = ProtostuffUtils.deserialize(data, config.getSchema());
+                server.putTask(new Task<R>(id, result, serverThread));
+            }catch (Exception e){
+                Logger.error("Socket读取线程异常", e);
             }
         }
+        Logger.info("连接关闭:" + socket.getRemoteSocketAddress().toString());
+        close();
     }
 }

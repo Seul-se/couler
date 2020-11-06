@@ -77,6 +77,7 @@ public class RPCClient<R,T> implements Config<T> {
                 while (it.hasNext()) {
                     Integer i = it.next();
                    if(!connections[i].isConnected()||connections[i].isClosed()){
+                       Logger.info("连接" + i + "关闭:" + host + ":" + port );
                        it.remove();
                        aviableSize = aviable.size();
                        try {

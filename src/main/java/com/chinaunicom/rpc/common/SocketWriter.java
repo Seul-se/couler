@@ -49,50 +49,42 @@ public class SocketWriter<T> extends Thread {
     }
 
     public void run(){
-        while (run) {
-            if (socket.isConnected()&&!socket.isClosed()) {
-                byte[][] datapackage = queue.poll();
-                if (datapackage == null) {
-                    try {
-                        synchronized (wait) {
-                            wait.wait(1000);
-                        }
-                    } catch (InterruptedException e) {
-                        Logger.error("Socket写入线程异常中断", e);
-                    }
-                } else {
-                    try {
-                        out.write(datapackage[0]);
-                        out.write(datapackage[1]);
-                        out.write(datapackage[2]);
-                        out.write(datapackage[3]);
-                    } catch (SocketException e){
-                        Logger.info("Socket写入线程关闭:" + e.getMessage());
-                        try {
-                            socket.close();
-                            this.onDisconect();
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        }
-                    }catch (IOException e) {
-                        Logger.error("Socket写入线程异常", e);
-                        try {
-                            socket.close();
-                            this.onDisconect();
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        }
-                    }
-                }
-            }else{
+        while (run&&socket.isConnected()&&!socket.isClosed()) {
+            byte[][] datapackage = queue.poll();
+            if (datapackage == null) {
                 try {
-                    Thread.sleep(1000);
+                    synchronized (wait) {
+                        wait.wait(1000);
+                    }
                 } catch (InterruptedException e) {
+                    Logger.error("Socket写入线程异常中断", e);
+                }
+            } else {
+                try {
+                    out.write(datapackage[0]);
+                    out.write(datapackage[1]);
+                    out.write(datapackage[2]);
+                    out.write(datapackage[3]);
+                } catch (SocketException e){
+                    Logger.info("Socket写入线程关闭:" + e.getMessage());
+                    try {
+                        socket.close();
+                        this.onDisconect();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }catch (IOException e) {
                     Logger.error("Socket写入线程异常", e);
+                    try {
+                        socket.close();
+                        this.onDisconect();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
             }
         }
-
+        close();
     }
 
     public void init(Socket socket) {

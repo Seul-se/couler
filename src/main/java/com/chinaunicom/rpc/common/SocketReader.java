@@ -43,8 +43,6 @@ public class SocketReader<T> extends Thread{
                     continue;
                 }
                 T result = ProtostuffUtils.deserialize(data, config.getSchema());
-//            config.getResultManager().putResult(id,result);
-//            process.process(id,result);
             }else{
                 try {
                     Thread.sleep(1000);
@@ -70,6 +68,7 @@ public class SocketReader<T> extends Thread{
                         index = 0;
                     }
                 }
+                close();
             }catch (SocketException e){
                 Logger.info("Socket读取线程关闭:" + e.getMessage());
                 try {
@@ -201,6 +200,7 @@ public class SocketReader<T> extends Thread{
         while (len < length) {
             int tmp = in.read(bytes, len, length - len);
             if(tmp == -1){
+                close();
                 return null;
             }
             len = len + tmp;
