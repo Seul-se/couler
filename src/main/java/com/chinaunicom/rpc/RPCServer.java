@@ -8,6 +8,7 @@ import com.chinaunicom.rpc.intf.Processor;
 import com.chinaunicom.rpc.intf.ReadProcess;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
+import com.chinaunicom.rpc.utill.RandomInt;
 import io.protostuff.Schema;
 
 import java.io.IOException;
@@ -47,10 +48,9 @@ public class RPCServer<R,T> implements Config<R> {
             processorThreads[i].start();
         }
     }
-    private  Random b=new Random();
 
     public void putTask(Task<R> t){
-        processorThreads[b.nextInt(threadNum)].add(t);
+        processorThreads[RandomInt.RandomInt(threadNum)].add(t);
     }
     public void open() throws IOException {
         ServerSocket server = new ServerSocket(port);

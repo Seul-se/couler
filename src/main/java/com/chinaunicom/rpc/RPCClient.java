@@ -8,6 +8,7 @@ import com.chinaunicom.rpc.intf.Config;
 import com.chinaunicom.rpc.intf.ReadProcess;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
+import com.chinaunicom.rpc.utill.RandomInt;
 import io.protostuff.Schema;
 
 import java.io.IOException;
@@ -76,12 +77,15 @@ public class RPCClient<R,T> implements Config<T> {
                 Iterator<Integer> it = aviable.iterator();
                 while (it.hasNext()) {
                     Integer i = it.next();
-                   if(!connections[i].isConnected()||connections[i].isClosed()){
+                   if(!connections[i].isConnected()||connections[i].isClosed()||socketReaders[i]==null
+                           ||!socketReaders[i].isAlive()||socketWriters[i]==null||!socketWriters[i].isAlive()){
                        Logger.info("连接" + i + "关闭:" + host + ":" + port );
                        it.remove();
                        aviableSize = aviable.size();
                        try {
                            connections[i].close();
+                           socketReaders[i].close();
+                           socketWriters[i].close();
                        } catch (Exception e) {
                            Logger.error("连接" + i + "关闭异常:" + host + ":" + port ,e);
                        }
@@ -97,20 +101,19 @@ public class RPCClient<R,T> implements Config<T> {
                             Logger.info("重连[" + i + "]成功:" + host + ":" + port );
                             aviable.add(i);
                             aviableSize = aviable.size();
-                            if(socketReaders[i]==null){
-                                socketReaders[i] = new ClientSocketReader<T>(getConfig());
+                            if(socketReaders[i]!=null){
+                                socketReaders[i].close();
                             }
+                            socketReaders[i] = new ClientSocketReader<T>(getConfig());
                             socketReaders[i].init(connections[i]);
-                            if(!socketReaders[i].isAlive()){
-                                socketReaders[i].start();
+                            socketReaders[i].start();
+                            if(socketWriters[i]!=null){
+                                socketWriters[i].close();
                             }
-                            if(socketWriters[i]==null){
-                                socketWriters[i] = new SocketWriter<T>(getConfig());
-                            }
+                            socketWriters[i] = new SocketWriter<T>(getConfig());
+                            socketWriters[i].setReconnect(true);
                             socketWriters[i].init(connections[i]);
-                            if(!socketWriters[i].isAlive()){
-                                socketWriters[i].start();
-                            }
+                            socketWriters[i].start();
                         } catch (Exception e) {
                             Logger.error("连接" + i + "重连失败异常:" + host + ":" + port ,e);
                         }
@@ -119,7 +122,6 @@ public class RPCClient<R,T> implements Config<T> {
             }
         }, 10000, 10000);
     }
-    private  Random b=new Random();
 
     AtomicLong ids = new AtomicLong(0);
 
@@ -141,7 +143,7 @@ public class RPCClient<R,T> implements Config<T> {
         if(aviableSize==0){
             throw new IOException("没有可用连接");
         }
-        int rand =b.nextInt(aviableSize);
+        int rand = RandomInt.RandomInt(aviableSize);
         int i = aviable.get(rand);
         Long id = getId();
         Object syncObj = new Object();
