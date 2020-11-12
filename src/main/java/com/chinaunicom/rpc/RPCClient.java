@@ -28,7 +28,7 @@ public class RPCClient<R,T> implements Config<T> {
     private SocketWriter<T>[] socketWriters;
     private List<Integer> aviable = new Vector<Integer>();
     private int aviableSize;
-    private Timer t = new Timer();
+    private Timer t ;
 
     public Config<T> getConfig(){
         return this;
@@ -69,7 +69,7 @@ public class RPCClient<R,T> implements Config<T> {
             }
         }
 
-
+        t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
