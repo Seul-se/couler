@@ -76,6 +76,7 @@ public class RPCClient<R,T> implements Config<T> {
                    if(connections[i] == null||!connections[i].isConnected()||connections[i].isClosed()||socketReaders[i]==null
                            ||!socketReaders[i].isAlive()||socketWriters[i]==null||!socketWriters[i].isAlive()){
                        Logger.info("连接" + i + "关闭:" + host + ":" + port );
+                       aviableSize--;
                        it.remove();
                        aviableSize = aviable.size();
                        try {
@@ -149,10 +150,10 @@ public class RPCClient<R,T> implements Config<T> {
         int i = aviable.get(rand);
         Long id = getId();
         Object syncObj = new Object();
-        socketWriters[i].write(ProtostuffUtils.serialize(req,reqSchema),id);
         socketReaders[i].getResultManager().putObj(id,syncObj);
         try {
             synchronized (syncObj) {
+                socketWriters[i].write(ProtostuffUtils.serialize(req,reqSchema),id);
                 syncObj.wait(timeout);
             }
         } catch (InterruptedException e) {

@@ -50,7 +50,7 @@ public class SocketWriter<T> extends Thread {
             if (datapackage == null) {
                 try {
                     synchronized (wait) {
-                        wait.wait(1000);
+                        wait.wait();
                     }
                 } catch (InterruptedException e) {
                     Logger.error("Socket写入线程异常中断", e);

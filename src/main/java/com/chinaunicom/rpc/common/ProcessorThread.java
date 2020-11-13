@@ -37,7 +37,7 @@ public class ProcessorThread<R,T> extends Thread {
             }else{
                 try {
                     synchronized (queue) {
-                        this.queue.wait(1000);
+                        this.queue.wait();
                     }
                 } catch (InterruptedException e) {
                     Logger.error("Process线程异常中断", e);
