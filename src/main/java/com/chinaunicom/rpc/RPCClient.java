@@ -1,11 +1,8 @@
 package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.ClientSocketReader;
-import com.chinaunicom.rpc.common.ResultManager;
-import com.chinaunicom.rpc.common.SocketReader;
 import com.chinaunicom.rpc.common.SocketWriter;
 import com.chinaunicom.rpc.intf.Config;
-import com.chinaunicom.rpc.intf.ReadProcess;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
 import com.chinaunicom.rpc.utill.RandomInt;
@@ -14,7 +11,6 @@ import io.protostuff.Schema;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RPCClient<R,T> implements Config<T> {
@@ -77,15 +73,21 @@ public class RPCClient<R,T> implements Config<T> {
                 Iterator<Integer> it = aviable.iterator();
                 while (it.hasNext()) {
                     Integer i = it.next();
-                   if(!connections[i].isConnected()||connections[i].isClosed()||socketReaders[i]==null
+                   if(connections[i] == null||!connections[i].isConnected()||connections[i].isClosed()||socketReaders[i]==null
                            ||!socketReaders[i].isAlive()||socketWriters[i]==null||!socketWriters[i].isAlive()){
                        Logger.info("连接" + i + "关闭:" + host + ":" + port );
                        it.remove();
                        aviableSize = aviable.size();
                        try {
-                           connections[i].close();
-                           socketReaders[i].close();
-                           socketWriters[i].close();
+                           if(connections[i]!=null) {
+                               connections[i].close();
+                           }
+                           if(socketReaders[i]!=null) {
+                               socketReaders[i].close();
+                           }
+                           if(socketWriters[i]!=null) {
+                               socketWriters[i].close();
+                           }
                        } catch (Exception e) {
                            Logger.error("连接" + i + "关闭异常:" + host + ":" + port ,e);
                        }
@@ -167,10 +169,16 @@ public class RPCClient<R,T> implements Config<T> {
     public void close(){
         t.cancel();
         for(int i=0;i<connectionNum;i++){
-            socketWriters[i].close();
-            socketReaders[i].close();
+            if(socketWriters[i]!=null) {
+                socketWriters[i].close();
+            }
+            if(socketReaders[i]!=null) {
+                socketReaders[i].close();
+            }
             try {
-                connections[i].close();
+                if(connections[i]!=null) {
+                    connections[i].close();
+                }
             } catch (IOException e) {
                 Logger.error("连接关闭失败:" + host + ":" + port ,e);
             }

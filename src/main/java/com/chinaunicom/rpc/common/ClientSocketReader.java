@@ -1,7 +1,6 @@
 package com.chinaunicom.rpc.common;
 
 import com.chinaunicom.rpc.intf.Config;
-import com.chinaunicom.rpc.intf.ReadProcess;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
 

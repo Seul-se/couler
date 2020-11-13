@@ -6,7 +6,6 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.Config;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
-import com.chinaunicom.rpc.utill.RandomInt;
 
 public class ServerSocketReader<R>  extends SocketReader<R>{
 

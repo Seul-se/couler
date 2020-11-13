@@ -6,10 +6,6 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.Processor;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
-
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ProcessorThread<R,T> extends Thread {

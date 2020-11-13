@@ -1,9 +1,5 @@
 package com.chinaunicom.rpc.common;
 
-import com.chinaunicom.rpc.utill.Logger;
-
-import java.net.Socket;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;

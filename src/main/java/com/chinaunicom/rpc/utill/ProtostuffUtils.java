@@ -5,8 +5,6 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ProtostuffUtils {
     /**
