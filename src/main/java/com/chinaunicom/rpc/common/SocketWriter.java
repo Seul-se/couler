@@ -38,10 +38,6 @@ public class SocketWriter<T> extends Thread {
         datapackage[2] = Byte2Int.intToByteArray(data.length);
         datapackage[3] = data;
         queue.offer(datapackage);
-//        queue.offer(head);
-//        queue.offer(Byte2Int.long2byte(id));
-//        queue.offer(Byte2Int.intToByteArray(data.length));
-//        queue.offer(data);
         synchronized (wait) {
             wait.notify();
         }
@@ -116,14 +112,14 @@ public class SocketWriter<T> extends Thread {
             try {
                 out.close();
             } catch (IOException e) {
-                Logger.error("Socket写入线程异常", e);
+                Logger.error("Socket写入线程关闭异常", e);
             }
         }
         if (this.socket != null) {
             try {
                 socket.close();
             } catch (IOException e) {
-                Logger.error("Socket写入线程异常", e);
+                Logger.error("Socket写入线程关闭异常", e);
             }
         }
 

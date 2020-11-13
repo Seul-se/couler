@@ -43,5 +43,13 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         close();
     }
 
+    public void close(){
+        super.close();
+        try {
+            resultManager.close();
+        }catch (Exception e) {
+            Logger.error("Socket读取线程关闭异常", e);
+        }
+    }
 
 }

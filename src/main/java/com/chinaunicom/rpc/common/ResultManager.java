@@ -22,6 +22,9 @@ public class ResultManager<T> {
     public void putResult(Long id,T result){
         resultMap.put(id,result);
         Object obj = waitObj.remove(id);
+        if(obj == null){
+            obj = oldWaitObj.remove(id);
+        }
         if(obj!=null){
             synchronized (obj) {
                 obj.notifyAll();
@@ -37,8 +40,10 @@ public class ResultManager<T> {
         return result;
     }
 
+    private Timer t;
+
     public ResultManager(){
-        Timer t = new Timer();
+        t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -53,5 +58,9 @@ public class ResultManager<T> {
                 waitObj = oldWaitObj;
             }
         }, 300000, 300000);
+    }
+
+    public void close(){
+        t.cancel();
     }
 }

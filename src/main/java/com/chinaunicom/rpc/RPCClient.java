@@ -79,14 +79,14 @@ public class RPCClient<R,T> implements Config<T> {
                        it.remove();
                        aviableSize = aviable.size();
                        try {
-                           if(connections[i]!=null) {
-                               connections[i].close();
-                           }
                            if(socketReaders[i]!=null) {
                                socketReaders[i].close();
                            }
                            if(socketWriters[i]!=null) {
                                socketWriters[i].close();
+                           }
+                           if(connections[i]!=null) {
+                               connections[i].close();
                            }
                        } catch (Exception e) {
                            Logger.error("连接" + i + "关闭异常:" + host + ":" + port ,e);

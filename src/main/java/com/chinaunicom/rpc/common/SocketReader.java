@@ -156,15 +156,15 @@ public abstract class SocketReader<T> extends Thread{
         if (this.in != null) {
             try {
                 in.close();
-            } catch (IOException e) {
-                Logger.error("Socket读取线程异常", e);
+            } catch (Exception e) {
+                Logger.error("Socket读取线程关闭异常", e);
             }
         }
         if (this.socket != null) {
             try {
                 socket.close();
-            } catch (IOException e) {
-                Logger.error("Socket读取线程异常", e);
+            } catch (Exception e) {
+                Logger.error("Socket读取线程关闭异常", e);
             }
         }
     }
