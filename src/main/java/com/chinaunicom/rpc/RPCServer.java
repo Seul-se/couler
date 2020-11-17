@@ -7,7 +7,6 @@ import com.chinaunicom.rpc.intf.Config;
 import com.chinaunicom.rpc.intf.Processor;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.ProtostuffUtils;
-import com.chinaunicom.rpc.utill.RandomInt;
 import io.protostuff.Schema;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ public class RPCServer<R,T> implements Config<R> {
     private int port;
     private Schema<R> reqSchema;
     private Schema<T> rspSchema;
-    private int threadNum;
 
     public Schema<R> getSchema(){
         return reqSchema;
@@ -30,22 +28,18 @@ public class RPCServer<R,T> implements Config<R> {
 
 
 
-    private ProcessorThread<R,T>[] processorThreads;
+    private ProcessorThread<R,T> processorThread;
 
     public RPCServer(int port, Class<R> reqClz, Class<T> rspClz, int threadNum, Processor<R,T> processor){
         this.port = port;
         this.reqSchema = ProtostuffUtils.getSchema(reqClz);
         this.rspSchema = ProtostuffUtils.getSchema(rspClz);
-        this.threadNum = threadNum;
-        this.processorThreads = new ProcessorThread[threadNum];
-        for(int i=0;i<processorThreads.length;i++){
-            processorThreads[i] = new ProcessorThread<R, T>(processor,this);
-            processorThreads[i].start();
-        }
+        this.processorThread = new ProcessorThread<R,T>(processor,this,threadNum);
+
     }
 
     public void putTask(Task<R> t){
-        processorThreads[RandomInt.RandomInt(threadNum)].add(t);
+        processorThread.add(t);
     }
     public void open() throws IOException {
         ServerSocket server = new ServerSocket(port);
