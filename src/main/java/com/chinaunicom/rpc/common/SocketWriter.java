@@ -31,10 +31,10 @@ public class SocketWriter<T> extends Thread {
         this.config = config;
     }
 
-    public void write(byte[] data,Long id){
+    public void write(byte[] data,Integer id){
         byte[][] datapackage = new byte[4][];
         datapackage[0] = head;
-        datapackage[1] = Byte2Int.long2byte(id);
+        datapackage[1] = Byte2Int.intToByteArray(id);
         datapackage[2] = Byte2Int.intToByteArray(data.length);
         datapackage[3] = data;
         queue.offer(datapackage);

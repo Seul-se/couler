@@ -64,11 +64,11 @@ public abstract class SocketReader<T> extends Thread{
         }
     }
 
-    protected Long readId(){
+    protected Integer readId(){
         try {
-            byte[] bytes = readBytes(in,8);
+            byte[] bytes = readBytes(in,4);
             if (bytes!=null) {
-                return Byte2Int.byteArrayToLong(bytes);
+                return Byte2Int.byteArrayToInt(bytes);
             }
         }catch (SocketException e){
             Logger.info("Socket读取线程关闭:" + e.getMessage());

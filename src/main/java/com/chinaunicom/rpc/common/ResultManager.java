@@ -7,19 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultManager<T> {
 
-    private Map<Long,Object> waitObj = new ConcurrentHashMap<Long,Object>();
+    private Map<Integer,Object> waitObj = new ConcurrentHashMap<Integer,Object>();
 
-    private Map<Long,Object> oldWaitObj = new ConcurrentHashMap<Long,Object>();
+    private Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
 
-    private Map<Long,T> resultMap = new ConcurrentHashMap<Long,T>();
+    private Map<Integer,T> resultMap = new ConcurrentHashMap<Integer,T>();
 
-    private Map<Long,T> oldResultMap = new ConcurrentHashMap<Long,T>();
+    private Map<Integer,T> oldResultMap = new ConcurrentHashMap<Integer,T>();
 
-    public void putObj(Long id,Object obj){
+    public void putObj(Integer id,Object obj){
         this.waitObj.put(id,obj);
     }
 
-    public void putResult(Long id,T result){
+    public void putResult(Integer id,T result){
         resultMap.put(id,result);
         Object obj = waitObj.remove(id);
         if(obj == null){
@@ -32,7 +32,7 @@ public class ResultManager<T> {
         }
     }
 
-    public T getResult(Long id){
+    public T getResult(Integer id){
         T result = resultMap.remove(id);
         if(result == null){
             return oldResultMap.remove(id);

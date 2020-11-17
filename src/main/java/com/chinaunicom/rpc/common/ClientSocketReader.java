@@ -22,7 +22,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         while (run&&socket.isConnected() && !socket.isClosed()) {
             try {
                 readHead();
-                Long id = readId();
+                Integer id = readId();
                 if (id == null) {
                     continue;
                 }

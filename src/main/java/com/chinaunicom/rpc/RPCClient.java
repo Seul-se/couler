@@ -11,6 +11,7 @@ import io.protostuff.Schema;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RPCClient<R,T> implements Config<T> {
@@ -126,12 +127,12 @@ public class RPCClient<R,T> implements Config<T> {
         }, 10000, 10000);
     }
 
-    AtomicLong ids = new AtomicLong(0);
+    AtomicInteger ids = new AtomicInteger(0);
 
-    private Long maxId = Long.MAX_VALUE / 2;
+    private Integer maxId = Integer.MAX_VALUE / 2;
 
-    private Long getId(){
-        Long id = ids.getAndIncrement();
+    private int getId(){
+        int id = ids.getAndIncrement();
         if(id > maxId){
             synchronized (ids){
                 if(ids.get() > maxId){
@@ -148,7 +149,7 @@ public class RPCClient<R,T> implements Config<T> {
         }
         int rand = RandomInt.RandomInt(aviableSize);
         int i = aviable.get(rand);
-        Long id = getId();
+        int id = getId();
         Object syncObj = new Object();
         socketReaders[i].getResultManager().putObj(id,syncObj);
         try {

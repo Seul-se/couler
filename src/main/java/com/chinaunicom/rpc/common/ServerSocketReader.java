@@ -21,7 +21,7 @@ public class ServerSocketReader<R>  extends SocketReader<R>{
         while (run&&socket.isConnected() && !socket.isClosed()) {
             try {
                 readHead();
-                Long id = readId();
+                Integer id = readId();
                 if (id == null) {
                     continue;
                 }
