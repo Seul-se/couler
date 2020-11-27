@@ -48,6 +48,9 @@ public class RPCClient<R,T> implements Config<T> {
         this.socketWriters = new SocketWriter[connectNum];
 
     }
+    public boolean isConnected(){
+        return aviableSize > 0;
+    }
 
     public void open(){
         for(int i=0;i<connectionNum;i++){

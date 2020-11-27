@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class RPCServer<R,T> implements Config<R> {
+public class RPCServer<R,T> extends Thread implements Config<R> {
 
     private int port;
     private Schema<R> reqSchema;
@@ -26,6 +26,7 @@ public class RPCServer<R,T> implements Config<R> {
         return rspSchema;
     }
 
+    ServerSocket server;
 
 
     private ProcessorThread<R,T> processorThread;
@@ -42,10 +43,19 @@ public class RPCServer<R,T> implements Config<R> {
         processorThread.add(t);
     }
     public void open() throws IOException {
-        ServerSocket server = new ServerSocket(port);
+        server = new ServerSocket(port);
         Logger.info("RPC服务启动，PORT:" + port );
+        this.start();
+    }
+
+    public void run(){
         while(true){
-            Socket socket = server.accept();
+            Socket socket = null;
+            try {
+                socket = server.accept();
+            } catch (IOException e) {
+                Logger.error("建立连接异常" ,e );
+            }
             Logger.info("建立连接:" + socket.getRemoteSocketAddress().toString() );
             SocketWriter<R> socketWriter = new SocketWriter<R>(this);
             socketWriter.init(socket);
@@ -57,11 +67,7 @@ public class RPCServer<R,T> implements Config<R> {
             serverThread.setSocketReader(socketReader);
             socketReader.init(socket);
             socketReader.start();
-
-
         }
-
-
     }
 
 
