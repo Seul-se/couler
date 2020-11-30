@@ -1,6 +1,5 @@
 package com.chinaunicom.rpc.common;
 
-import com.chinaunicom.rpc.intf.Config;
 import com.chinaunicom.rpc.utill.Byte2Int;
 import com.chinaunicom.rpc.utill.Logger;
 
@@ -19,7 +18,6 @@ public class SocketWriter<T> extends Thread {
     Object wait = new Object();
     Socket socket;
     OutputStream out ;
-    Config<T> config;
     boolean run = true;
     boolean reconnect = false;
 
@@ -27,9 +25,6 @@ public class SocketWriter<T> extends Thread {
         this.reconnect = reconnect;
     }
 
-    public SocketWriter (Config<T> config){
-        this.config = config;
-    }
 
     public void write(byte[] data,Integer id){
         byte[][] datapackage = new byte[4][];

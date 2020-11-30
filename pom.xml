@@ -6,18 +6,20 @@
 
     <groupId>cn.chinaunicom</groupId>
     <artifactId>couler</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
 
     <dependencies>
         <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-core</artifactId>
             <version>1.7.2</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-runtime</artifactId>
             <version>1.7.2</version>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 

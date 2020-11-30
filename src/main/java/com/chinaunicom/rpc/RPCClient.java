@@ -2,23 +2,19 @@ package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.ClientSocketReader;
 import com.chinaunicom.rpc.common.SocketWriter;
-import com.chinaunicom.rpc.intf.Config;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.ProtostuffUtils;
 import com.chinaunicom.rpc.utill.RandomInt;
-import io.protostuff.Schema;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RPCClient<R,T> implements Config<T> {
+public class RPCClient<R,T>  {
 
     private String host;
     private int port;
-    private Schema<R> reqSchema;
-    private Schema<T> rspSchema;
     private int connectionNum;
     private Socket[] connections;
     private ClientSocketReader<T>[] socketReaders;
@@ -29,23 +25,20 @@ public class RPCClient<R,T> implements Config<T> {
 
     private ThreadLocal objContainer = new ThreadLocal();
 
-    public Config<T> getConfig(){
-        return this;
-    }
+    private Serializer<R> serializer;
 
-    public Schema<T> getSchema(){
-        return rspSchema;
-    }
+    private Serializer<T> deserializer;
 
-    public RPCClient(String host,int port,Class<R> reqClz,Class<T> rspClz,int connectNum){
+
+    public RPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
         this.host = host;
         this.port = port;
-        this.reqSchema = ProtostuffUtils.getSchema(reqClz);
-        this.rspSchema = ProtostuffUtils.getSchema(rspClz);
         this.connections = new Socket[connectNum];
         this.connectionNum = connectNum;
         this.socketReaders = new ClientSocketReader[connectNum];
         this.socketWriters = new SocketWriter[connectNum];
+        this.serializer = serializer;
+        this.deserializer = deserializer;
 
     }
     public boolean isConnected(){
@@ -59,10 +52,10 @@ public class RPCClient<R,T> implements Config<T> {
                 Logger.info("连接[" + i + "]成功:" + host + ":" + port );
                 aviable.add(i);
                 aviableSize = aviable.size();
-                socketReaders[i] = new ClientSocketReader<T>(this);
+                socketReaders[i] = new ClientSocketReader<T>(deserializer);
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
-                socketWriters[i] = new SocketWriter<T>(this);
+                socketWriters[i] = new SocketWriter<T>();
                 socketWriters[i].setReconnect(true);
                 socketWriters[i].init(connections[i]);
                 socketWriters[i].start();
@@ -112,13 +105,13 @@ public class RPCClient<R,T> implements Config<T> {
                             if(socketReaders[i]!=null){
                                 socketReaders[i].close();
                             }
-                            socketReaders[i] = new ClientSocketReader<T>(getConfig());
+                            socketReaders[i] = new ClientSocketReader<T>(deserializer);
                             socketReaders[i].init(connections[i]);
                             socketReaders[i].start();
                             if(socketWriters[i]!=null){
                                 socketWriters[i].close();
                             }
-                            socketWriters[i] = new SocketWriter<T>(getConfig());
+                            socketWriters[i] = new SocketWriter<T>();
                             socketWriters[i].setReconnect(true);
                             socketWriters[i].init(connections[i]);
                             socketWriters[i].start();
@@ -162,7 +155,7 @@ public class RPCClient<R,T> implements Config<T> {
         socketReaders[i].getResultManager().putObj(id,syncObj);
         try {
             synchronized (syncObj) {
-                socketWriters[i].write(ProtostuffUtils.serialize(req,reqSchema),id);
+                socketWriters[i].write(serializer.serialize(req),id);
                 syncObj.wait(timeout);
             }
         } catch (InterruptedException e) {

@@ -3,39 +3,29 @@ package com.chinaunicom.rpc;
 import com.chinaunicom.rpc.common.*;
 import com.chinaunicom.rpc.entity.ServerThread;
 import com.chinaunicom.rpc.entity.Task;
-import com.chinaunicom.rpc.intf.Config;
 import com.chinaunicom.rpc.intf.Processor;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.ProtostuffUtils;
-import io.protostuff.Schema;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class RPCServer<R,T> extends Thread implements Config<R> {
+public class RPCServer<R,T> extends Thread  {
 
     private int port;
-    private Schema<R> reqSchema;
-    private Schema<T> rspSchema;
 
-    public Schema<R> getSchema(){
-        return reqSchema;
-    }
-    public Schema<T> getRspSchema(){
-        return rspSchema;
-    }
+    private Serializer<R> deserializer;
 
     ServerSocket server;
 
 
     private ProcessorThread<R,T> processorThread;
 
-    public RPCServer(int port, Class<R> reqClz, Class<T> rspClz, int threadNum, Processor<R,T> processor){
+    public RPCServer(int port, int threadNum, Processor<R,T> processor,Serializer<T> serializer,Serializer<R> deserializer){
         this.port = port;
-        this.reqSchema = ProtostuffUtils.getSchema(reqClz);
-        this.rspSchema = ProtostuffUtils.getSchema(rspClz);
-        this.processorThread = new ProcessorThread<R,T>(processor,this,threadNum);
+        this.processorThread = new ProcessorThread<R,T>(processor,this,threadNum,serializer);
+        this.deserializer = deserializer;
 
     }
 
@@ -57,11 +47,11 @@ public class RPCServer<R,T> extends Thread implements Config<R> {
                 Logger.error("建立连接异常" ,e );
             }
             Logger.info("建立连接:" + socket.getRemoteSocketAddress().toString() );
-            SocketWriter<R> socketWriter = new SocketWriter<R>(this);
+            SocketWriter<R> socketWriter = new SocketWriter<R>();
             socketWriter.init(socket);
             socketWriter.start();
             ServerThread serverThread = new ServerThread();
-            ServerSocketReader<R> socketReader = new ServerSocketReader<R>(this,this, serverThread);
+            ServerSocketReader<R> socketReader = new ServerSocketReader<R>(deserializer,this, serverThread);
             serverThread.setSocket(socket);
             serverThread.setSocketWriter(socketWriter);
             serverThread.setSocketReader(socketReader);

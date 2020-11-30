@@ -1,6 +1,6 @@
 package com.chinaunicom.rpc.common;
 
-import com.chinaunicom.rpc.intf.Config;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Byte2Int;
 import com.chinaunicom.rpc.utill.Logger;
 
@@ -16,13 +16,14 @@ public abstract class SocketReader<T> extends Thread{
     Object wait = new Object();
     Socket socket;
     InputStream in;
-    Config<T> config;
     boolean run = true;
     boolean reconnect = false;
+    protected Serializer<T> deserializer;
 
-    public SocketReader(Config<T> config){
-        this.config = config;
+    public SocketReader(Serializer<T> deserializer){
+        this.deserializer = deserializer;
     }
+
 
     public void run(){
 

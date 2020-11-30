@@ -1,8 +1,7 @@
 package com.chinaunicom.rpc.common;
 
-import com.chinaunicom.rpc.intf.Config;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.ProtostuffUtils;
 
 public class ClientSocketReader<T> extends SocketReader<T>{
 
@@ -13,8 +12,8 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         return  resultManager;
     }
 
-    public ClientSocketReader(Config<T> config) {
-        super(config);
+    public ClientSocketReader(Serializer<T> deserializer) {
+        super(deserializer);
         this.reconnect = true;
     }
 
@@ -34,7 +33,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
                 if (data == null) {
                     continue;
                 }
-                T result = ProtostuffUtils.deserialize(data, config.getSchema());
+                T result = deserializer.deserialize(data);
                 resultManager.putResult(id, result);
             }catch (Exception e){
                 Logger.error("Socket读取线程异常", e);

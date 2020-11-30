@@ -4,8 +4,8 @@ import com.chinaunicom.rpc.RPCServer;
 import com.chinaunicom.rpc.entity.ServerThread;
 import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.Processor;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.ProtostuffUtils;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -14,6 +14,7 @@ public class ProcessorThread<R,T> {
 
     private ConcurrentLinkedQueue<Task<R>> queue = new ConcurrentLinkedQueue<Task<R>>();
 
+
     public void add(Task<R> task){
         this.queue.offer(task);
         synchronized (queue) {
@@ -21,9 +22,9 @@ public class ProcessorThread<R,T> {
         }
     }
 
-    public ProcessorThread(Processor<R,T> processor, RPCServer<R,T> rpcServer,int size){
+    public ProcessorThread(Processor<R,T> processor, RPCServer<R,T> rpcServer,int size,Serializer<T> serializer){
         for(int i=0;i<size;i++){
-            new RunThread<R,T>(queue,processor,rpcServer).start();
+            new RunThread<R,T>(queue,processor,rpcServer,serializer).start();
         }
     }
     public static class RunThread<R,T> extends Thread{
@@ -31,11 +32,13 @@ public class ProcessorThread<R,T> {
         private Queue<Task<R>> queue;
         Processor<R,T> processor;
         RPCServer rpcServer;
+        private Serializer<T> serializer;
 
-        public RunThread(Queue<Task<R>> queue,Processor<R,T> processor,RPCServer rpcServer){
+        public RunThread(Queue<Task<R>> queue,Processor<R,T> processor,RPCServer rpcServer,Serializer<T> serializer){
             this.queue = queue;
             this.processor = processor;
             this.rpcServer = rpcServer;
+            this.serializer = serializer;
         }
 
         public void run(){
@@ -43,7 +46,7 @@ public class ProcessorThread<R,T> {
                 Task<R> task = queue.poll();
                 if(task!=null){
                     T result = processor.process(task.getData());
-                    byte[] resultData = ProtostuffUtils.serialize(result,rpcServer.getRspSchema());
+                    byte[] resultData = serializer.serialize(result);
                     ServerThread serverThread = task.getServerThread();
                     serverThread.getSocketWriter().write(resultData,task.getId());
                 }else{
