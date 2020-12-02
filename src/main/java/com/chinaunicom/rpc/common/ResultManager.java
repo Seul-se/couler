@@ -7,13 +7,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ResultManager<T> {
 
-    private Map<Integer,Object> waitObj = new ConcurrentHashMap<Integer,Object>();
+    protected Map<Integer,Object> waitObj = new ConcurrentHashMap<Integer,Object>();
 
-    private Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
+    protected Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
 
-    private Map<Integer,T> resultMap = new ConcurrentHashMap<Integer,T>();
+    protected Map<Integer,T> resultMap = new ConcurrentHashMap<Integer,T>();
 
-    private Map<Integer,T> oldResultMap = new ConcurrentHashMap<Integer,T>();
+    protected Map<Integer,T> oldResultMap = new ConcurrentHashMap<Integer,T>();
 
     public void putObj(Integer id,Object obj){
         this.waitObj.put(id,obj);

@@ -6,15 +6,20 @@ import com.chinaunicom.rpc.utill.Logger;
 public class ClientSocketReader<T> extends SocketReader<T>{
 
 
-    private ResultManager<T> resultManager = new ResultManager<T>();
+    private ResultManager<T> resultManager;
 
     public ResultManager<T> getResultManager(){
         return  resultManager;
     }
 
-    public ClientSocketReader(Serializer<T> deserializer) {
+    public ClientSocketReader(Serializer<T> deserializer,boolean isAsync) {
         super(deserializer);
         this.reconnect = true;
+        if(isAsync){
+            resultManager  = new AsyncResultManager<T>();
+        }else{
+            resultManager  = new ResultManager<T>();
+        }
     }
 
     public void run(){

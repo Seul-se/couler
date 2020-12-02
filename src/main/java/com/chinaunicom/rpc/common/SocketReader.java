@@ -13,7 +13,6 @@ public abstract class SocketReader<T> extends Thread{
 
 
     private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
-    Object wait = new Object();
     Socket socket;
     InputStream in;
     boolean run = true;

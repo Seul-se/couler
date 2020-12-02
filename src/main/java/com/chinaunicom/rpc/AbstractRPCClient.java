@@ -11,26 +11,28 @@ import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RPCClient<R,T>  {
+public class AbstractRPCClient<R,T>  {
 
-    private String host;
-    private int port;
+    protected String host;
+    protected int port;
     private int connectionNum;
     private Socket[] connections;
-    private ClientSocketReader<T>[] socketReaders;
-    private SocketWriter<T>[] socketWriters;
-    private List<Integer> aviable = new Vector<Integer>();
-    private int aviableSize;
+    protected ClientSocketReader<T>[] socketReaders;
+    protected SocketWriter<T>[] socketWriters;
+    protected List<Integer> aviable = new Vector<Integer>();
+    protected int aviableSize;
     private Timer t ;
 
-    private ThreadLocal objContainer = new ThreadLocal();
+    protected ThreadLocal objContainer = new ThreadLocal();
 
-    private Serializer<R> serializer;
+    protected Serializer<R> serializer;
 
-    private Serializer<T> deserializer;
+    protected Serializer<T> deserializer;
+
+    protected boolean isAsync;
 
 
-    public RPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
+    public AbstractRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
         this.host = host;
         this.port = port;
         this.connections = new Socket[connectNum];
@@ -39,7 +41,6 @@ public class RPCClient<R,T>  {
         this.socketWriters = new SocketWriter[connectNum];
         this.serializer = serializer;
         this.deserializer = deserializer;
-
     }
     public boolean isConnected(){
         return aviableSize > 0;
@@ -52,7 +53,7 @@ public class RPCClient<R,T>  {
                 Logger.info("连接[" + i + "]成功:" + host + ":" + port );
                 aviable.add(i);
                 aviableSize = aviable.size();
-                socketReaders[i] = new ClientSocketReader<T>(deserializer);
+                socketReaders[i] = new ClientSocketReader<T>(deserializer,isAsync);
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
                 socketWriters[i] = new SocketWriter<T>();
@@ -105,7 +106,7 @@ public class RPCClient<R,T>  {
                             if(socketReaders[i]!=null){
                                 socketReaders[i].close();
                             }
-                            socketReaders[i] = new ClientSocketReader<T>(deserializer);
+                            socketReaders[i] = new ClientSocketReader<T>(deserializer,isAsync);
                             socketReaders[i].init(connections[i]);
                             socketReaders[i].start();
                             if(socketWriters[i]!=null){
@@ -128,7 +129,7 @@ public class RPCClient<R,T>  {
 
     private static final Integer maxId = Integer.MAX_VALUE / 2;
 
-    private int getId(){
+    protected int getId(){
         int id = ids.getAndIncrement();
         if(id > maxId){
             synchronized (ids){
@@ -138,35 +139,6 @@ public class RPCClient<R,T>  {
             }
         }
         return id;
-    }
-
-    public T call(R req,int timeout) throws IOException {
-        if(aviableSize==0){
-            throw new IOException("没有可用连接");
-        }
-        int rand = RandomInt.RandomInt(aviableSize);
-        int i = aviable.get(rand);
-        int id = getId();
-        Object syncObj = objContainer.get();
-        if(syncObj == null ){
-            syncObj = new Object();
-            objContainer.set(syncObj);
-        }
-        socketReaders[i].getResultManager().putObj(id,syncObj);
-        try {
-            synchronized (syncObj) {
-                socketWriters[i].write(serializer.serialize(req),id);
-                syncObj.wait(timeout);
-            }
-        } catch (InterruptedException e) {
-            Logger.error("线程异常唤醒:" + host + ":" + port ,e);
-        }
-        T rsp = socketReaders[i].getResultManager().getResult(id);
-        if(rsp!=null){
-            return rsp;
-        }else{
-            throw new IOException("获取返回结果超时 id:" + id);
-        }
     }
 
     public void close(){
