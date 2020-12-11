@@ -2,6 +2,7 @@ package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.ClientSocketReader;
 import com.chinaunicom.rpc.common.SocketWriter;
+import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.RandomInt;
@@ -30,25 +31,29 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         int rand = RandomInt.RandomInt(aviableSize);
         int i = aviable.get(rand);
         int id = getId();
-        Object syncObj = objContainer.get();
+        ResultSet<T> syncObj = objContainer.get();
         if(syncObj == null ){
-            syncObj = new Object();
+            syncObj = new ResultSet<T>();
             objContainer.set(syncObj);
         }
-        socketReaders[i].getResultManager().putObj(id,syncObj);
         try {
-            synchronized (syncObj) {
-                socketWriters[i].write(serializer.serialize(req),id);
-                syncObj.wait(timeout);
+            socketReaders[i].getResultManager().putObj(id, syncObj);
+            try {
+                synchronized (syncObj) {
+                    socketWriters[i].write(serializer.serialize(req), id);
+                    syncObj.wait(timeout);
+                }
+            } catch (InterruptedException e) {
+                Logger.error("线程异常唤醒:" + host + ":" + port, e);
             }
-        } catch (InterruptedException e) {
-            Logger.error("线程异常唤醒:" + host + ":" + port ,e);
-        }
-        T rsp = socketReaders[i].getResultManager().getResult(id);
-        if(rsp!=null){
-            return rsp;
-        }else{
-            throw new IOException("获取返回结果超时 id:" + id);
+            T rsp = syncObj.getResult();
+            if (rsp != null) {
+                return rsp;
+            } else {
+                throw new IOException("获取返回结果超时 id:" + id);
+            }
+        }finally {
+            syncObj.setResult(null);
         }
     }
 

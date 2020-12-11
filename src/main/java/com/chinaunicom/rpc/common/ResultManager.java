@@ -1,5 +1,7 @@
 package com.chinaunicom.rpc.common;
 
+import com.chinaunicom.rpc.entity.ResultSet;
+
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,34 +13,24 @@ public class ResultManager<T> {
 
     protected Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
 
-    protected Map<Integer,T> resultMap = new ConcurrentHashMap<Integer,T>();
-
-    protected Map<Integer,T> oldResultMap = new ConcurrentHashMap<Integer,T>();
 
     public void putObj(Integer id,Object obj){
         this.waitObj.put(id,obj);
     }
 
     public void putResult(Integer id,T result){
-        resultMap.put(id,result);
         Object obj = waitObj.remove(id);
         if(obj == null){
             obj = oldWaitObj.remove(id);
         }
         if(obj!=null){
+            ((ResultSet<T>)obj).setResult(result);
             synchronized (obj) {
                 obj.notifyAll();
             }
         }
     }
 
-    public T getResult(Integer id){
-        T result = resultMap.remove(id);
-        if(result == null){
-            return oldResultMap.remove(id);
-        }
-        return result;
-    }
 
     private Timer t;
 
@@ -47,12 +39,8 @@ public class ResultManager<T> {
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Map tmp = oldResultMap;
-                oldResultMap = resultMap;
-                tmp.clear();
-                resultMap = tmp;
 
-                tmp = oldWaitObj;
+                Map tmp = oldWaitObj;
                 oldWaitObj = waitObj;
                 tmp.clear();
                 waitObj = oldWaitObj;

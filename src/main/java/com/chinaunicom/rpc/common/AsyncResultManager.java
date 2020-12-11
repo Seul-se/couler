@@ -9,11 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class AsyncResultManager<T> extends ResultManager<T> {
 
-
-    public void putObj(Integer id,Object obj){
-        this.waitObj.put(id,obj);
-    }
-
     public void putResult(Integer id,T result){
         Object obj = waitObj.remove(id);
         if(obj == null){

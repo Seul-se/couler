@@ -2,6 +2,7 @@ package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.ClientSocketReader;
 import com.chinaunicom.rpc.common.SocketWriter;
+import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.RandomInt;
@@ -23,7 +24,7 @@ public class AbstractRPCClient<R,T>  {
     protected int aviableSize;
     private Timer t ;
 
-    protected ThreadLocal objContainer = new ThreadLocal();
+    protected ThreadLocal<ResultSet<T>> objContainer = new ThreadLocal<ResultSet<T>>();
 
     protected Serializer<R> serializer;
 
