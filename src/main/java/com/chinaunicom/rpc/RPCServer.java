@@ -3,7 +3,8 @@ package com.chinaunicom.rpc;
 import com.chinaunicom.rpc.common.*;
 import com.chinaunicom.rpc.entity.ServerThread;
 import com.chinaunicom.rpc.entity.Task;
-import com.chinaunicom.rpc.intf.Processor;
+import com.chinaunicom.rpc.intf.AsyncProcessor;
+import com.chinaunicom.rpc.intf.SyncProcessor;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.Logger;
 
@@ -22,9 +23,15 @@ public class RPCServer<R,T> extends Thread  {
 
     private ProcessorThread<R,T> processorThread;
 
-    public RPCServer(int port, int threadNum, Processor<R,T> processor,Serializer<T> serializer,Serializer<R> deserializer){
+    public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
-        this.processorThread = new ProcessorThread<R,T>(processor,this,threadNum,serializer);
+        this.processorThread = new ProcessorThread<R,T>(processor,threadNum,serializer);
+        this.deserializer = deserializer;
+
+    }
+    public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor, Serializer<T> serializer, Serializer<R> deserializer){
+        this.port = port;
+        this.processorThread = new ProcessorThread<R,T>(asyncProcessor,threadNum,serializer);
         this.deserializer = deserializer;
 
     }

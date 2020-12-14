@@ -39,7 +39,6 @@ public class ResultManager<T> {
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-
                 Map tmp = oldWaitObj;
                 oldWaitObj = waitObj;
                 tmp.clear();
