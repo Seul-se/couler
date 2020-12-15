@@ -16,7 +16,7 @@ public class AsyncResultManager<T> extends ResultManager<T> {
         }
         if(obj!=null){
             ResultCallback<T> resultCallback = (ResultCallback<T>)obj;
-            resultCallback.call(result);
+            resultCallback.onSuccess(result);
         }
     }
 
