@@ -2,27 +2,24 @@ package com.chinaunicom.rpc.common;
 
 import com.chinaunicom.rpc.utill.Byte2Int;
 import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.RingBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SocketWriter<T> extends Thread {
 
-    private final static int queueNum = 10;
-
-    private RingBuffer<byte[][]> ringBuffer = new RingBuffer<byte[][]>(queueNum);
+    private ConcurrentLinkedQueue<byte[][]> queue = new ConcurrentLinkedQueue<byte[][]>();
 
     private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
 
-
+    Object wait = new Object();
     Socket socket;
     OutputStream out ;
     boolean run = true;
     boolean reconnect = false;
-
 
     public void setReconnect(boolean reconnect){
         this.reconnect = reconnect;
@@ -35,36 +32,48 @@ public class SocketWriter<T> extends Thread {
         datapackage[1] = Byte2Int.intToByteArray(id);
         datapackage[2] = Byte2Int.intToByteArray(data.length);
         datapackage[3] = data;
-        ringBuffer.offer(datapackage);
+        queue.offer(datapackage);
+        synchronized (wait) {
+            wait.notify();
+        }
 
     }
 
     public void run(){
         while (run&&socket.isConnected()&&!socket.isClosed()) {
-            byte[][] datapackage = ringBuffer.poll();
-            try {
-                out.write(datapackage[0]);
-                out.write(datapackage[1]);
-                out.write(datapackage[2]);
-                out.write(datapackage[3]);
-            } catch (SocketException e){
-                Logger.info("Socket写入线程关闭:" + e.getMessage());
+            byte[][] datapackage = queue.poll();
+            if (datapackage == null) {
                 try {
-                    socket.close();
-                    this.onDisconect();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    synchronized (wait) {
+                        wait.wait();
+                    }
+                } catch (InterruptedException e) {
+                    Logger.error("Socket写入线程异常中断", e);
                 }
-            }catch (IOException e) {
-                Logger.error("Socket写入线程异常", e);
+            } else {
                 try {
-                    socket.close();
-                    this.onDisconect();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    out.write(datapackage[0]);
+                    out.write(datapackage[1]);
+                    out.write(datapackage[2]);
+                    out.write(datapackage[3]);
+                } catch (SocketException e){
+                    Logger.info("Socket写入线程关闭:" + e.getMessage());
+                    try {
+                        socket.close();
+                        this.onDisconect();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
+                }catch (IOException e) {
+                    Logger.error("Socket写入线程异常", e);
+                    try {
+                        socket.close();
+                        this.onDisconect();
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
+                    }
                 }
             }
-
         }
         close();
     }
@@ -94,7 +103,6 @@ public class SocketWriter<T> extends Thread {
     }
     public void close(){
         run = false;
-        ringBuffer.stop();
         if (this.out != null) {
             try {
                 out.close();
