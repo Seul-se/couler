@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
 
@@ -35,17 +36,14 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         if(syncObj == null ){
             syncObj = new ResultSet<T>();
             objContainer.set(syncObj);
+            syncObj.setT(Thread.currentThread());
         }
         try {
             socketReaders[i].getResultManager().putObj(id, syncObj);
-            try {
-                synchronized (syncObj) {
-                    socketWriters[i].write(serializer.serialize(req), id);
-                    syncObj.wait(timeout);
-                }
-            } catch (InterruptedException e) {
-                Logger.error("线程异常唤醒:" + host + ":" + port, e);
-            }
+
+            socketWriters[i].write(serializer.serialize(req), id);
+            LockSupport.parkNanos(timeout*1000000);
+
             T rsp = syncObj.getResult();
             if (rsp != null) {
                 return rsp;

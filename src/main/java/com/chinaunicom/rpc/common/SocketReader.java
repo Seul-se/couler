@@ -28,8 +28,8 @@ public abstract class SocketReader<T> extends Thread{
 
     }
 
+    private final byte[] bytes = new byte[1];
     protected void readHead(){
-        byte[] bytes = new byte[1];
         int index = 0;
         while (run&&socket.isConnected()&&!socket.isClosed()) {
             try {
@@ -169,8 +169,15 @@ public abstract class SocketReader<T> extends Thread{
         }
     }
 
+    private byte[] bytes4 = new byte[4];
+
     private byte[] readBytes(InputStream in,int length) throws IOException {
-        byte[] bytes = new byte[length];
+        byte[] bytes;
+        if(length == 4){
+            bytes = bytes4;
+        }else {
+            bytes = new byte[length];
+        }
         int len = 0;
         while (len < length) {
             int tmp = in.read(bytes, len, length - len);

@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
 public class SocketWriter<T> extends Thread {
 
@@ -15,11 +17,11 @@ public class SocketWriter<T> extends Thread {
 
     private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
 
-    Object wait = new Object();
     Socket socket;
     OutputStream out ;
     boolean run = true;
     boolean reconnect = false;
+    AtomicBoolean isWait = new AtomicBoolean(false);
 
     public void setReconnect(boolean reconnect){
         this.reconnect = reconnect;
@@ -33,8 +35,8 @@ public class SocketWriter<T> extends Thread {
         datapackage[2] = Byte2Int.intToByteArray(data.length);
         datapackage[3] = data;
         queue.offer(datapackage);
-        synchronized (wait) {
-            wait.notify();
+        if(isWait.compareAndSet(true,false)) {
+            LockSupport.unpark(this);
         }
 
     }
@@ -43,13 +45,8 @@ public class SocketWriter<T> extends Thread {
         while (run&&socket.isConnected()&&!socket.isClosed()) {
             byte[][] datapackage = queue.poll();
             if (datapackage == null) {
-                try {
-                    synchronized (wait) {
-                        wait.wait();
-                    }
-                } catch (InterruptedException e) {
-                    Logger.error("Socket写入线程异常中断", e);
-                }
+                isWait.set(true);
+                LockSupport.park();
             } else {
                 try {
                     out.write(datapackage[0]);

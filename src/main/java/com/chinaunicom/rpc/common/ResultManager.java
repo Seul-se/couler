@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.LockSupport;
 
 public class ResultManager<T> {
 
@@ -25,9 +26,7 @@ public class ResultManager<T> {
         }
         if(obj!=null){
             ((ResultSet<T>)obj).setResult(result);
-            synchronized (obj) {
-                obj.notifyAll();
-            }
+            LockSupport.unpark(((ResultSet<T>)obj).getT());
         }
     }
 

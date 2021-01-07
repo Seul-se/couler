@@ -1,8 +1,8 @@
 package com.test;
 
-import com.chinaunicom.rpc.intf.Processor;
+import com.chinaunicom.rpc.intf.SyncProcessor;
 
-public class MyProcessor implements Processor<RequestPojo, ResponsePojo> {
+public class MyProcessor implements SyncProcessor<RequestPojo, ResponsePojo> {
     public ResponsePojo process(RequestPojo req) {
         ResponsePojo rsp = new ResponsePojo();
         rsp.setCode("server" + req.getName());
