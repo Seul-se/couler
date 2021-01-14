@@ -12,7 +12,7 @@ import java.net.SocketException;
 public abstract class SocketReader<T> extends Thread{
 
 
-    private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
+    private static final int head = 255;
     Socket socket;
     InputStream in;
     boolean run = true;
@@ -28,15 +28,15 @@ public abstract class SocketReader<T> extends Thread{
 
     }
 
-    private final byte[] bytes = new byte[1];
     protected void readHead(){
         int index = 0;
+        int tail;
         while (run&&socket.isConnected()&&!socket.isClosed()) {
             try {
-                while (in.read(bytes) != -1) {
-                    if(bytes[0] == head[index]){
+                while ((tail = in.read()) != -1) {
+                    if(tail == head){
                         index++;
-                        if(index>=8){
+                        if(index>=4){
                             return;
                         }
                     }else{
@@ -50,7 +50,7 @@ public abstract class SocketReader<T> extends Thread{
                     socket.close();
                     this.onDisconect();
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    Logger.error("Socket读取线程异常", e);
                 }
             } catch (Exception e) {
                 Logger.error("Socket读取线程异常", e);
@@ -58,25 +58,22 @@ public abstract class SocketReader<T> extends Thread{
                 try {
                     socket.close();
                 } catch (IOException ioException) {
-                    ioException.printStackTrace();
+                    Logger.error("Socket读取线程异常", e);
                 }
             }
         }
     }
 
-    protected Integer readId(){
+    protected int readId(){
         try {
-            byte[] bytes = readBytes(in,4);
-            if (bytes!=null) {
-                return Byte2Int.byteArrayToInt(bytes);
-            }
+            return readInt(in);
         }catch (SocketException e){
             Logger.info("Socket读取线程关闭:" + e.getMessage());
             try {
                 socket.close();
                 this.onDisconect();
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Logger.error("Socket读取线程异常", e);
             }
         }catch (Exception e){
             Logger.error("Socket读取线程异常", e);
@@ -84,10 +81,10 @@ public abstract class SocketReader<T> extends Thread{
                 socket.close();
                 this.onDisconect();
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Logger.error("Socket读取线程异常", e);
             }
         }
-        return null;
+        return -1;
     }
 
     protected byte[] readData(int length){
@@ -99,7 +96,7 @@ public abstract class SocketReader<T> extends Thread{
                 socket.close();
                 this.onDisconect();
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Logger.error("Socket读取线程异常", e);
             }
         }catch (Exception e){
             Logger.error("Socket读取线程异常", e);
@@ -107,18 +104,15 @@ public abstract class SocketReader<T> extends Thread{
                 socket.close();
                 this.onDisconect();
             } catch (IOException ioException) {
-                ioException.printStackTrace();
+                Logger.error("Socket读取线程异常", e);
             }
         }
         return null;
     }
 
     public int readLength(){
-        byte[] bytes = new byte[4];
         try {
-            if (in.read(bytes) != -1) {//TODO TEST
-                return Byte2Int.byteArrayToInt(bytes);
-            }
+           return readInt(in);
         }catch (Exception e){
             Logger.error("Socket读取线程异常", e);
         }
@@ -169,15 +163,17 @@ public abstract class SocketReader<T> extends Thread{
         }
     }
 
-    private byte[] bytes4 = new byte[4];
+    private int readInt(InputStream in) throws IOException {
+        int value = 0;
+        value += in.read() <<24;
+        value += in.read() <<16;
+        value += in.read() <<8;
+        value += in.read();
+        return value;
+    }
 
     private byte[] readBytes(InputStream in,int length) throws IOException {
-        byte[] bytes;
-        if(length == 4){
-            bytes = bytes4;
-        }else {
-            bytes = new byte[length];
-        }
+        byte[] bytes = new byte[length];
         int len = 0;
         while (len < length) {
             int tmp = in.read(bytes, len, length - len);

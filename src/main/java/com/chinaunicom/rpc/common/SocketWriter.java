@@ -15,7 +15,7 @@ public class SocketWriter<T> extends Thread {
 
     private ConcurrentLinkedQueue<byte[][]> queue = new ConcurrentLinkedQueue<byte[][]>();
 
-    private static final byte[] head = Byte2Int.long2byte(Long.MAX_VALUE);
+    private static final byte[] head = new byte[4];
 
     Socket socket;
     OutputStream out ;
@@ -76,6 +76,10 @@ public class SocketWriter<T> extends Thread {
     }
 
     public void init(Socket socket) {
+        head[0] = (byte)255;
+        head[1] = (byte)255;
+        head[2] = (byte)255;
+        head[3] = (byte)255;
         synchronized (socket) {
             if (this.out != null) {
                 try {
