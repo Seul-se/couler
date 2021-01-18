@@ -114,7 +114,13 @@ public abstract class SocketReader<T> extends Thread{
         try {
            return readInt(in);
         }catch (Exception e){
-            Logger.error("Socket读取线程异常", e);
+            Logger.info("Socket读取线程关闭:" + e.getMessage());
+            try {
+                socket.close();
+                this.onDisconect();
+            } catch (IOException ioException) {
+                Logger.error("Socket读取线程异常", e);
+            }
         }
         return -1;
     }
@@ -140,8 +146,6 @@ public abstract class SocketReader<T> extends Thread{
     private void onDisconect(){
         if(!reconnect){
             close();
-        }else{
-
         }
     }
 

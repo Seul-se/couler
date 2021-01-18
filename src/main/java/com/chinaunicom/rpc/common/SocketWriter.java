@@ -29,11 +29,9 @@ public class SocketWriter<T> extends Thread {
 
 
     public void write(byte[] data,Integer id){
-        byte[][] datapackage = new byte[4][];
-        datapackage[0] = head;
-        datapackage[1] = Byte2Int.intToByteArray(id);
-        datapackage[2] = Byte2Int.intToByteArray(data.length);
-        datapackage[3] = data;
+        byte[][] datapackage = new byte[2][];
+        datapackage[0] = Byte2Int.intToByteArray(id);
+        datapackage[1] = data;
         queue.offer(datapackage);
         if(isWait.compareAndSet(true,false)) {
             LockSupport.unpark(this);
@@ -49,10 +47,10 @@ public class SocketWriter<T> extends Thread {
                 LockSupport.park();
             } else {
                 try {
+                    out.write(head);
                     out.write(datapackage[0]);
+                    out.write(Byte2Int.intToByteArray(datapackage[1].length));
                     out.write(datapackage[1]);
-                    out.write(datapackage[2]);
-                    out.write(datapackage[3]);
                 } catch (SocketException e){
                     Logger.info("Socket写入线程关闭:" + e.getMessage());
                     try {
