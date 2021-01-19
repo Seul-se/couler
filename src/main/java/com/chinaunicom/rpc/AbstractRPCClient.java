@@ -58,7 +58,6 @@ public class AbstractRPCClient<R,T>  {
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
                 socketWriters[i] = new SocketWriter<T>();
-                socketWriters[i].setReconnect(true);
                 socketWriters[i].init(connections[i]);
                 socketWriters[i].start();
             } catch (IOException e) {
@@ -114,7 +113,6 @@ public class AbstractRPCClient<R,T>  {
                                 socketWriters[i].close();
                             }
                             socketWriters[i] = new SocketWriter<T>();
-                            socketWriters[i].setReconnect(true);
                             socketWriters[i].init(connections[i]);
                             socketWriters[i].start();
                         } catch (Exception e) {

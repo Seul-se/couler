@@ -20,12 +20,8 @@ public class SocketWriter<T> extends Thread {
     Socket socket;
     OutputStream out ;
     boolean run = true;
-    boolean reconnect = false;
     AtomicBoolean isWait = new AtomicBoolean(false);
 
-    public void setReconnect(boolean reconnect){
-        this.reconnect = reconnect;
-    }
 
 
     public void write(byte[] data,Integer id){
@@ -44,7 +40,7 @@ public class SocketWriter<T> extends Thread {
             byte[][] datapackage = queue.poll();
             if (datapackage == null) {
                 isWait.set(true);
-                LockSupport.park();
+                LockSupport.parkNanos(1000000000);
             } else {
                 try {
                     out.write(head);
@@ -52,21 +48,10 @@ public class SocketWriter<T> extends Thread {
                     out.write(Byte2Int.intToByteArray(datapackage[1].length));
                     out.write(datapackage[1]);
                 } catch (SocketException e){
-                    Logger.info("Socket写入线程关闭:" + e.getMessage());
-                    try {
-                        socket.close();
-                        this.onDisconect();
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
+                   close();
                 }catch (IOException e) {
                     Logger.error("Socket写入线程异常", e);
-                    try {
-                        socket.close();
-                        this.onDisconect();
-                    } catch (IOException ioException) {
-                        ioException.printStackTrace();
-                    }
+                    close();
                 }
             }
         }
@@ -87,6 +72,7 @@ public class SocketWriter<T> extends Thread {
                 }
             }
             this.socket = socket;
+            this.setName("SocketWriter:" + socket.getInetAddress().toString());
             try {
                 this.out = socket.getOutputStream();
             } catch (IOException e) {
@@ -95,13 +81,11 @@ public class SocketWriter<T> extends Thread {
         }
     }
 
-    public void onDisconect(){
-        if(!reconnect){
-            close();
-        }
-    }
+
     public void close(){
+        Logger.info("Socket写入线程关闭:" + Thread.currentThread().getName());
         run = false;
+        LockSupport.unpark(this);
         if (this.out != null) {
             try {
                 out.close();

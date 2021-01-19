@@ -14,7 +14,6 @@ public class ClientSocketReader<T> extends SocketReader<T>{
 
     public ClientSocketReader(Serializer<T> deserializer,boolean isAsync) {
         super(deserializer);
-        this.reconnect = true;
         if(isAsync){
             resultManager  = new AsyncResultManager<T>();
         }else{

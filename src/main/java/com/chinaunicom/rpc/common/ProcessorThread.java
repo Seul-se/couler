@@ -9,13 +9,14 @@ import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.utill.RandomInt;
 
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
 public class ProcessorThread<R,T> {
 
-    private ConcurrentLinkedQueue<Task<R>> queue = new ConcurrentLinkedQueue<Task<R>>();
+    private Queue<Task<R>> queue = new ArrayBlockingQueue<Task<R>>(3000);
 
 
     private int size;

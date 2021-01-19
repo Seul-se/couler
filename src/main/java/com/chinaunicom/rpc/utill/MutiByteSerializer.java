@@ -2,9 +2,6 @@ package com.chinaunicom.rpc.utill;
 
 import com.chinaunicom.rpc.intf.Serializer;
 
-import java.util.LinkedList;
-import java.util.List;
-
 public class MutiByteSerializer implements Serializer<byte[][]> {
 
     public byte[] serialize(byte[][] obj) {

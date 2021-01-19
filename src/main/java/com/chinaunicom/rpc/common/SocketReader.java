@@ -16,7 +16,6 @@ public abstract class SocketReader<T> extends Thread{
     Socket socket;
     InputStream in;
     boolean run = true;
-    boolean reconnect = false;
     protected Serializer<T> deserializer;
 
     public SocketReader(Serializer<T> deserializer){
@@ -45,21 +44,10 @@ public abstract class SocketReader<T> extends Thread{
                 }
                 close();
             }catch (SocketException e){
-                Logger.info("Socket读取线程关闭:" + e.getMessage());
-                try {
-                    socket.close();
-                    this.onDisconect();
-                } catch (IOException ioException) {
-                    Logger.error("Socket读取线程异常", e);
-                }
+                close();
             } catch (Exception e) {
                 Logger.error("Socket读取线程异常", e);
-                this.onDisconect();
-                try {
-                    socket.close();
-                } catch (IOException ioException) {
-                    Logger.error("Socket读取线程异常", e);
-                }
+                close();
             }
         }
     }
@@ -68,21 +56,10 @@ public abstract class SocketReader<T> extends Thread{
         try {
             return readInt(in);
         }catch (SocketException e){
-            Logger.info("Socket读取线程关闭:" + e.getMessage());
-            try {
-                socket.close();
-                this.onDisconect();
-            } catch (IOException ioException) {
-                Logger.error("Socket读取线程异常", e);
-            }
+            close();
         }catch (Exception e){
             Logger.error("Socket读取线程异常", e);
-            try {
-                socket.close();
-                this.onDisconect();
-            } catch (IOException ioException) {
-                Logger.error("Socket读取线程异常", e);
-            }
+            close();
         }
         return -1;
     }
@@ -91,21 +68,10 @@ public abstract class SocketReader<T> extends Thread{
         try {
             return readBytes(in,length);
         }catch (SocketException e){
-            Logger.info("Socket读取线程关闭:" + e.getMessage());
-            try {
-                socket.close();
-                this.onDisconect();
-            } catch (IOException ioException) {
-                Logger.error("Socket读取线程异常", e);
-            }
+            close();
         }catch (Exception e){
             Logger.error("Socket读取线程异常", e);
-            try {
-                socket.close();
-                this.onDisconect();
-            } catch (IOException ioException) {
-                Logger.error("Socket读取线程异常", e);
-            }
+            close();
         }
         return null;
     }
@@ -114,13 +80,7 @@ public abstract class SocketReader<T> extends Thread{
         try {
            return readInt(in);
         }catch (Exception e){
-            Logger.info("Socket读取线程关闭:" + e.getMessage());
-            try {
-                socket.close();
-                this.onDisconect();
-            } catch (IOException ioException) {
-                Logger.error("Socket读取线程异常", e);
-            }
+            close();
         }
         return -1;
     }
@@ -135,6 +95,7 @@ public abstract class SocketReader<T> extends Thread{
                 }
             }
             this.socket = socket;
+            this.setName("SocketReader:" + socket.getInetAddress().toString());
             try {
                 this.in = socket.getInputStream();
             } catch (IOException e) {
@@ -143,13 +104,9 @@ public abstract class SocketReader<T> extends Thread{
         }
     }
 
-    private void onDisconect(){
-        if(!reconnect){
-            close();
-        }
-    }
 
     public void close(){
+        Logger.info("Socket读取线程关闭:" + Thread.currentThread().getName());
             run = false;
         if (this.in != null) {
             try {
