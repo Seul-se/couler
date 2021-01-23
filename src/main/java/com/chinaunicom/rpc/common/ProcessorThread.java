@@ -16,7 +16,7 @@ import java.util.concurrent.locks.LockSupport;
 
 public class ProcessorThread<R,T> {
 
-    private Queue<Task<R>> queue = new ArrayBlockingQueue<Task<R>>(3000);
+    private Queue<Task<R>> queue = new ConcurrentLinkedQueue<Task<R>>();
 
 
     private int size;
