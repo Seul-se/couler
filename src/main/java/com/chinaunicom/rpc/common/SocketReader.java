@@ -23,10 +23,6 @@ public abstract class SocketReader<T> extends Thread{
     }
 
 
-    public void run(){
-
-    }
-
     protected void readHead(){
         int index = 0;
         int tail;

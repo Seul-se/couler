@@ -6,6 +6,7 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.AsyncProcessor;
 import com.chinaunicom.rpc.intf.SyncProcessor;
 import com.chinaunicom.rpc.intf.Serializer;
+import com.chinaunicom.rpc.utill.Logger;
 import com.chinaunicom.rpc.utill.RandomInt;
 
 import java.util.Queue;
@@ -74,15 +75,19 @@ public class ProcessorThread<R,T> {
 
         public void run(){
             while (true){
-                Task<R> task = queue.poll();
-                if(task!=null){
-                    T result = processor.process(task.getData());
-                    byte[] resultData = serializer.serialize(result);
-                    ServerThread serverThread = task.getServerThread();
-                    serverThread.getSocketWriter().write(resultData,task.getId());
-                }else{
-                    isWait.set(true);
-                    LockSupport.park();
+                try {
+                    Task<R> task = queue.poll();
+                    if (task != null) {
+                        T result = processor.process(task.getData());
+                        byte[] resultData = serializer.serialize(result);
+                        ServerThread serverThread = task.getServerThread();
+                        serverThread.getSocketWriter().write(resultData, task.getId());
+                    } else {
+                        isWait.set(true);
+                        LockSupport.park();
+                    }
+                }catch (Exception e){
+                    Logger.error("处理线程异常：", e);
                 }
             }
         }
@@ -105,13 +110,17 @@ public class ProcessorThread<R,T> {
 
         public void run(){
             while (true){
-                Task<R> task = queue.poll();
-                if(task!=null){
-                    asyncProcessor.process(task.getData(),new AsyncContext<T>(task,serializer));
-                }else{
-                    isWait.set(true);
-                    LockSupport.park();
+                try {
+                    Task<R> task = queue.poll();
+                    if (task != null) {
+                        asyncProcessor.process(task.getData(), new AsyncContext<T>(task, serializer));
+                    } else {
+                        isWait.set(true);
+                        LockSupport.park();
 
+                    }
+                }catch (Exception e){
+                    Logger.error("处理线程异常：", e);
                 }
             }
         }
