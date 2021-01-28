@@ -26,7 +26,9 @@ public class ResultManager<T> {
         }
         if(obj!=null){
             ((ResultSet<T>)obj).setResult(result);
-            LockSupport.unpark(((ResultSet<T>)obj).getT());
+            synchronized (obj) {
+                obj.notify();
+            }
         }
     }
 

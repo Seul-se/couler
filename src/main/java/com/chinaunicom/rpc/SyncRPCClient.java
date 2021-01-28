@@ -32,26 +32,22 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         int rand = RandomInt.RandomInt(aviableSize);
         int i = aviable.get(rand);
         int id = getId();
-        ResultSet<T> syncObj = objContainer.get();
-        if(syncObj == null ){
-            syncObj = new ResultSet<T>();
-            objContainer.set(syncObj);
-            syncObj.setT(Thread.currentThread());
-        }
+        ResultSet<T> syncObj = new ResultSet<T>();
         try {
             socketReaders[i].getResultManager().putObj(id, syncObj);
-
-            socketWriters[i].write(serializer.serialize(req), id);
-            LockSupport.parkNanos(timeout*1000000);
-
-            T rsp = syncObj.getResult();
-            if (rsp != null) {
-                return rsp;
-            } else {
-                throw new IOException("获取返回结果超时 id:" + id);
+            synchronized (syncObj) {
+                socketWriters[i].write(serializer.serialize(req), id);
+                syncObj.wait(timeout);
             }
-        }finally {
-            syncObj.setResult(null);
+        } catch (InterruptedException e) {
+            Logger.error("线程异常唤醒:" + host + ":" + port, e);
+        }
+
+        T rsp = syncObj.getResult();
+        if (rsp != null) {
+            return rsp;
+        } else {
+            throw new IOException("获取返回结果超时 id:" + id);
         }
     }
 

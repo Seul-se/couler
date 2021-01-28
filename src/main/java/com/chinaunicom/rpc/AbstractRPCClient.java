@@ -24,8 +24,6 @@ public class AbstractRPCClient<R,T>  {
     protected int aviableSize;
     private Timer t ;
 
-    protected ThreadLocal<ResultSet<T>> objContainer = new ThreadLocal<ResultSet<T>>();
-
     protected Serializer<R> serializer;
 
     protected Serializer<T> deserializer;
