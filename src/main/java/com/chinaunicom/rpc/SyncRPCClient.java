@@ -47,6 +47,7 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         if (rsp != null) {
             return rsp;
         } else {
+            socketReaders[i].getResultManager().removeObj(id);
             throw new IOException("获取返回结果超时 id:" + id);
         }
     }

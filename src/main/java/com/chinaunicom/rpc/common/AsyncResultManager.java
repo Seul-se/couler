@@ -38,7 +38,7 @@ public class AsyncResultManager<T> extends ResultManager<T> {
                     }
                 }
                 tmp.clear();
-                waitObj = oldWaitObj;
+                waitObj = tmp;
             }
         }, 60000, 60000);
     }

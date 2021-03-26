@@ -19,6 +19,15 @@ public class ResultManager<T> {
         this.waitObj.put(id,obj);
     }
 
+    public Object removeObj(Integer id){
+        Object o = waitObj.remove(id);
+        if(o!=null){
+            return o;
+        }else {
+            return oldWaitObj.remove(id);
+        }
+    }
+
     public void putResult(Integer id,T result){
         Object obj = waitObj.remove(id);
         if(obj == null){
@@ -43,7 +52,7 @@ public class ResultManager<T> {
                 Map tmp = oldWaitObj;
                 oldWaitObj = waitObj;
                 tmp.clear();
-                waitObj = oldWaitObj;
+                waitObj = tmp;
             }
         }, 300000, 300000);
     }
