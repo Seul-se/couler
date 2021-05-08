@@ -1,7 +1,7 @@
 package com.chinaunicom.rpc.common;
 
-import com.chinaunicom.rpc.utill.Byte2Int;
-import com.chinaunicom.rpc.utill.Logger;
+import com.chinaunicom.rpc.util.Byte2Int;
+import com.chinaunicom.rpc.util.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,7 +15,7 @@ public class SocketWriter<T> extends Thread {
 
     private ConcurrentLinkedQueue<byte[][]> queue = new ConcurrentLinkedQueue<byte[][]>();
 
-    private static final byte[] head = new byte[4];
+    private static final byte[] HEAD = new byte[4];
 
     Socket socket;
     OutputStream out ;
@@ -35,6 +35,7 @@ public class SocketWriter<T> extends Thread {
 
     }
 
+    @Override
     public void run(){
         while (run&&socket.isConnected()&&!socket.isClosed()) {
             byte[][] datapackage = queue.poll();
@@ -43,7 +44,7 @@ public class SocketWriter<T> extends Thread {
                 LockSupport.parkNanos(1000000000);
             } else {
                 try {
-                    out.write(head);
+                    out.write(HEAD);
                     out.write(datapackage[0]);
                     out.write(Byte2Int.intToByteArray(datapackage[1].length));
                     out.write(datapackage[1]);
@@ -59,10 +60,10 @@ public class SocketWriter<T> extends Thread {
     }
 
     public void init(Socket socket) {
-        head[0] = (byte)255;
-        head[1] = (byte)255;
-        head[2] = (byte)255;
-        head[3] = (byte)255;
+        HEAD[0] = (byte)255;
+        HEAD[1] = (byte)255;
+        HEAD[2] = (byte)255;
+        HEAD[3] = (byte)255;
         synchronized (socket) {
             if (this.out != null) {
                 try {

@@ -1,8 +1,7 @@
 package com.test;
 
 import com.chinaunicom.rpc.RPCServer;
-import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.ProtostuffSerializer;
+import com.chinaunicom.rpc.util.ProtostuffSerializer;
 
 import java.io.IOException;
 

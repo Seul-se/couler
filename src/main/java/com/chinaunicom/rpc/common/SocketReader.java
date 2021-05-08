@@ -1,8 +1,7 @@
 package com.chinaunicom.rpc.common;
 
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Byte2Int;
-import com.chinaunicom.rpc.utill.Logger;
+import com.chinaunicom.rpc.util.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +11,7 @@ import java.net.SocketException;
 public abstract class SocketReader<T> extends Thread{
 
 
-    private static final int head = 255;
+    private static final int HEAD = 255;
     Socket socket;
     InputStream in;
     boolean run = true;
@@ -29,7 +28,7 @@ public abstract class SocketReader<T> extends Thread{
         while (run&&socket.isConnected()&&!socket.isClosed()) {
             try {
                 while ((tail = in.read()) != -1) {
-                    if(tail == head){
+                    if(tail == HEAD){
                         index++;
                         if(index>=4){
                             return;

@@ -1,4 +1,4 @@
-package com.chinaunicom.rpc.utill;
+package com.chinaunicom.rpc.util;
 
 import com.chinaunicom.rpc.intf.Serializer;
 import io.protostuff.LinkedBuffer;
@@ -58,10 +58,12 @@ public class ProtostuffSerializer<T> implements Serializer<T> {
     }
 
 
+    @Override
     public byte[] serialize(T obj) {
         return serialize(obj,schema);
     }
 
+    @Override
     public T deserialize(byte[] data) {
         return deserialize(data,schema);
     }

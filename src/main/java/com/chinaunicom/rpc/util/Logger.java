@@ -1,4 +1,4 @@
-package com.chinaunicom.rpc.utill;
+package com.chinaunicom.rpc.util;
 
 import com.chinaunicom.rpc.intf.RPCLogger;
 
@@ -12,20 +12,24 @@ public abstract class Logger {
 
     private static RPCLogger getDefaultLogger(){
         return new RPCLogger() {
+            @Override
             public void info(String log){
                 System.out.println(log);
             }
 
-            public void info(String log,Throwable e){
+            @Override
+            public void info(String log, Throwable e){
                 System.out.println(log);
                 e.printStackTrace();
             }
 
+            @Override
             public void error(String log){
                 System.out.println(log);
             }
 
-            public void error(String log,Throwable e){
+            @Override
+            public void error(String log, Throwable e){
                 System.out.println(log);
                 e.printStackTrace();
             }

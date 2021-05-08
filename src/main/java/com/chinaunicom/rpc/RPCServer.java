@@ -6,7 +6,7 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.AsyncProcessor;
 import com.chinaunicom.rpc.intf.SyncProcessor;
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Logger;
+import com.chinaunicom.rpc.util.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -45,6 +45,7 @@ public class RPCServer<R,T> extends Thread  {
         this.start();
     }
 
+    @Override
     public void run(){
         while(true){
             Socket socket = null;

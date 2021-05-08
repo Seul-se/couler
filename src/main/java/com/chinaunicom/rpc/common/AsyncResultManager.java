@@ -9,7 +9,8 @@ import java.util.TimerTask;
 
 public class AsyncResultManager<T> extends ResultManager<T> {
 
-    public void putResult(Integer id,T result){
+    @Override
+    public void putResult(Integer id, T result){
         Object obj = waitObj.remove(id);
         if(obj == null){
             obj = oldWaitObj.remove(id);
@@ -43,6 +44,7 @@ public class AsyncResultManager<T> extends ResultManager<T> {
         }, 60000, 60000);
     }
 
+    @Override
     public void close(){
         t.cancel();
     }

@@ -1,7 +1,7 @@
 package com.chinaunicom.rpc.common;
 
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Logger;
+import com.chinaunicom.rpc.util.Logger;
 
 public class ClientSocketReader<T> extends SocketReader<T>{
 
@@ -21,6 +21,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         }
     }
 
+    @Override
     public void run(){
         while (run&&socket.isConnected() && !socket.isClosed()) {
             try {
@@ -46,6 +47,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         close();
     }
 
+    @Override
     public void close(){
         super.close();
         try {

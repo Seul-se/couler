@@ -4,7 +4,7 @@ import com.chinaunicom.rpc.RPCServer;
 import com.chinaunicom.rpc.entity.ServerThread;
 import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Logger;
+import com.chinaunicom.rpc.util.Logger;
 
 public class ServerSocketReader<R>  extends SocketReader<R>{
 
@@ -18,6 +18,7 @@ public class ServerSocketReader<R>  extends SocketReader<R>{
 
     }
 
+    @Override
     public void run(){
         while (run&&socket.isConnected() && !socket.isClosed()) {
             try {

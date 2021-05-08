@@ -6,11 +6,9 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.AsyncProcessor;
 import com.chinaunicom.rpc.intf.SyncProcessor;
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.RandomInt;
+import com.chinaunicom.rpc.util.Logger;
 
 import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
@@ -73,6 +71,7 @@ public class ProcessorThread<R,T> {
             this.serializer = serializer;
         }
 
+        @Override
         public void run(){
             while (true){
                 try {
@@ -108,6 +107,7 @@ public class ProcessorThread<R,T> {
             this.serializer = serializer;
         }
 
+        @Override
         public void run(){
             while (true){
                 try {

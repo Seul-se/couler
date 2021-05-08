@@ -1,4 +1,4 @@
-package com.chinaunicom.rpc.utill;
+package com.chinaunicom.rpc.util;
 
 public class Byte2Int {
     /**

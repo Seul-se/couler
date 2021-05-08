@@ -2,10 +2,8 @@ package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.ClientSocketReader;
 import com.chinaunicom.rpc.common.SocketWriter;
-import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
-import com.chinaunicom.rpc.utill.Logger;
-import com.chinaunicom.rpc.utill.RandomInt;
+import com.chinaunicom.rpc.util.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -20,8 +18,8 @@ public class AbstractRPCClient<R,T>  {
     private Socket[] connections;
     protected ClientSocketReader<T>[] socketReaders;
     protected SocketWriter<T>[] socketWriters;
-    protected List<Integer> aviable = new Vector<Integer>();
-    protected int aviableSize;
+    protected List<Integer> available = new Vector<Integer>();
+    protected int availableSize;
     private Timer t ;
 
     protected Serializer<R> serializer;
@@ -42,7 +40,7 @@ public class AbstractRPCClient<R,T>  {
         this.deserializer = deserializer;
     }
     public boolean isConnected(){
-        return aviableSize > 0;
+        return availableSize > 0;
     }
 
     public void open(){
@@ -50,8 +48,8 @@ public class AbstractRPCClient<R,T>  {
             try {
                 connections[i] = new Socket(host,port);
                 Logger.info("连接[" + i + "]成功:" + host + ":" + port );
-                aviable.add(i);
-                aviableSize = aviable.size();
+                available.add(i);
+                availableSize = available.size();
                 socketReaders[i] = new ClientSocketReader<T>(deserializer,isAsync);
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
@@ -67,15 +65,15 @@ public class AbstractRPCClient<R,T>  {
         t.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                Iterator<Integer> it = aviable.iterator();
+                Iterator<Integer> it = available.iterator();
                 while (it.hasNext()) {
                     Integer i = it.next();
                    if(connections[i] == null||!connections[i].isConnected()||connections[i].isClosed()||socketReaders[i]==null
                            ||!socketReaders[i].isAlive()||socketWriters[i]==null||!socketWriters[i].isAlive()){
                        Logger.info("连接" + i + "关闭:" + host + ":" + port );
-                       aviableSize--;
+                       availableSize--;
                        it.remove();
-                       aviableSize = aviable.size();
+                       availableSize = available.size();
                        try {
                            if(socketReaders[i]!=null) {
                                socketReaders[i].close();
@@ -95,12 +93,12 @@ public class AbstractRPCClient<R,T>  {
                 }
 
                 for(int i=0;i<connectionNum;i++){
-                    if(!aviable.contains(i)){
+                    if(!available.contains(i)){
                         try {
                             connections[i] = new Socket(host,port);
                             Logger.info("重连[" + i + "]成功:" + host + ":" + port );
-                            aviable.add(i);
-                            aviableSize = aviable.size();
+                            available.add(i);
+                            availableSize = available.size();
                             if(socketReaders[i]!=null){
                                 socketReaders[i].close();
                             }
@@ -124,13 +122,13 @@ public class AbstractRPCClient<R,T>  {
 
     AtomicInteger ids = new AtomicInteger(0);
 
-    private static final Integer maxId = Integer.MAX_VALUE / 2;
+    private static final Integer MAX_ID = Integer.MAX_VALUE / 2;
 
     protected int getId(){
         int id = ids.getAndIncrement();
-        if(id > maxId){
+        if(id > MAX_ID){
             synchronized (ids){
-                if(ids.get() > maxId){
+                if(ids.get() > MAX_ID){
                     ids.getAndSet(0);
                 }
             }
@@ -155,7 +153,7 @@ public class AbstractRPCClient<R,T>  {
                 Logger.error("连接关闭失败:" + host + ":" + port ,e);
             }
         }
-        aviable.clear();
-        aviableSize = 0;
+        available.clear();
+        availableSize = 0;
     }
 }

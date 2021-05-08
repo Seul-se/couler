@@ -1,9 +1,10 @@
-package com.chinaunicom.rpc.utill;
+package com.chinaunicom.rpc.util;
 
 import com.chinaunicom.rpc.intf.Serializer;
 
-public class MutiByteSerializer implements Serializer<byte[][]> {
+public class MultiByteSerializer implements Serializer<byte[][]> {
 
+    @Override
     public byte[] serialize(byte[][] obj) {
         int length = 4;
         for(int i=0;i<obj.length;i++){
@@ -24,6 +25,7 @@ public class MutiByteSerializer implements Serializer<byte[][]> {
         return content;
     }
 
+    @Override
     public byte[][] deserialize(byte[] data) {
         byte[] len = new byte[4];
         System.arraycopy(data,0,len,0,4);

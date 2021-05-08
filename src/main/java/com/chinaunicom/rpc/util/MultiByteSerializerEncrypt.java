@@ -1,23 +1,25 @@
-package com.chinaunicom.rpc.utill;
+package com.chinaunicom.rpc.util;
 
 import com.chinaunicom.rpc.intf.Serializer;
 
-public class MutiByteSerializerEncrypt implements Serializer<byte[][]> {
+public class MultiByteSerializerEncrypt implements Serializer<byte[][]> {
 
     private byte[] key;
 
-    private MutiByteSerializer mutiByteSerializer = new MutiByteSerializer();
+    private MultiByteSerializer mutiByteSerializer = new MultiByteSerializer();
 
-    public MutiByteSerializerEncrypt(byte[] key){
+    public MultiByteSerializerEncrypt(byte[] key){
         this.key = key;
     }
 
+    @Override
     public byte[] serialize(byte[][] obj) {
         byte[] content = mutiByteSerializer.serialize(obj);
         content = encrypt(content,key);
         return content;
     }
 
+    @Override
     public byte[][] deserialize(byte[] data) {
         data = encrypt(data,key);
         byte[][] result = mutiByteSerializer.deserialize(data);

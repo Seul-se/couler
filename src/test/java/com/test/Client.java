@@ -1,7 +1,7 @@
 package com.test;
 
 import com.chinaunicom.rpc.SyncRPCClient;
-import com.chinaunicom.rpc.utill.ProtostuffSerializer;
+import com.chinaunicom.rpc.util.ProtostuffSerializer;
 
 import java.io.IOException;
 
