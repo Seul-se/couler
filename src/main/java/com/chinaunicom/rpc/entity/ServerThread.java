@@ -1,7 +1,7 @@
 package com.chinaunicom.rpc.entity;
 
-import com.chinaunicom.rpc.common.SocketReader;
-import com.chinaunicom.rpc.common.SocketWriter;
+import com.chinaunicom.rpc.common.socket.SocketReader;
+import com.chinaunicom.rpc.common.socket.SocketWriter;
 
 import java.net.Socket;
 

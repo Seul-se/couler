@@ -1,23 +1,27 @@
-package com.chinaunicom.rpc.common;
+package com.chinaunicom.rpc.common.socket;
 
+import com.chinaunicom.rpc.common.result.AbstractResultManager;
+import com.chinaunicom.rpc.common.result.AsyncResultManager;
+import com.chinaunicom.rpc.common.result.SyncResultManager;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
+import com.chinaunicom.rpc.util.ThreadPool;
 
 public class ClientSocketReader<T> extends SocketReader<T>{
 
 
-    private ResultManager<T> resultManager;
+    private AbstractResultManager<T> resultManager;
 
-    public ResultManager<T> getResultManager(){
+    public AbstractResultManager<T> getResultManager(){
         return  resultManager;
     }
 
-    public ClientSocketReader(Serializer<T> deserializer,boolean isAsync) {
+    public ClientSocketReader(Serializer<T> deserializer, ThreadPool threadPool) {
         super(deserializer);
-        if(isAsync){
-            resultManager  = new AsyncResultManager<T>();
+        if(threadPool!=null){
+            resultManager  = new AsyncResultManager<T>(threadPool);
         }else{
-            resultManager  = new ResultManager<T>();
+            resultManager  = new SyncResultManager<T>();
         }
     }
 

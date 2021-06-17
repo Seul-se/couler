@@ -1,17 +1,24 @@
 package com.chinaunicom.rpc;
 
+import com.chinaunicom.rpc.entity.ServerThread;
 import com.chinaunicom.rpc.intf.ResultCallback;
 import com.chinaunicom.rpc.intf.Serializer;
+import com.chinaunicom.rpc.util.Logger;
 import com.chinaunicom.rpc.util.RandomInt;
+import com.chinaunicom.rpc.util.ThreadPool;
 
 import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.LockSupport;
 
 public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
 
 
-    public AsyncRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer) {
+    public AsyncRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer,int threadPoolSize) {
         super(host, port, connectNum, serializer, deserializer);
-        this.isAsync = true;
+        this.threadPool = new ThreadPool(threadPoolSize);
+
     }
 
     public void call(R req, ResultCallback<T> callback) throws IOException {
@@ -24,4 +31,7 @@ public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
         socketReaders[i].getResultManager().putObj(id,callback);
         socketWriters[i].write(serializer.serialize(req),id);
     }
+
+
+
 }

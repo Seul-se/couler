@@ -1,4 +1,4 @@
-package com.chinaunicom.rpc.common;
+package com.chinaunicom.rpc.common.socket;
 
 import com.chinaunicom.rpc.RPCServer;
 import com.chinaunicom.rpc.entity.ServerThread;

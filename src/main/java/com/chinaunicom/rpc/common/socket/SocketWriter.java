@@ -1,4 +1,4 @@
-package com.chinaunicom.rpc.common;
+package com.chinaunicom.rpc.common.socket;
 
 import com.chinaunicom.rpc.util.Byte2Int;
 import com.chinaunicom.rpc.util.Logger;

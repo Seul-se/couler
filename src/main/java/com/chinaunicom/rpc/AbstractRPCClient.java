@@ -1,9 +1,10 @@
 package com.chinaunicom.rpc;
 
-import com.chinaunicom.rpc.common.ClientSocketReader;
-import com.chinaunicom.rpc.common.SocketWriter;
+import com.chinaunicom.rpc.common.socket.ClientSocketReader;
+import com.chinaunicom.rpc.common.socket.SocketWriter;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
+import com.chinaunicom.rpc.util.ThreadPool;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -26,7 +27,7 @@ public class AbstractRPCClient<R,T>  {
 
     protected Serializer<T> deserializer;
 
-    protected boolean isAsync;
+    protected ThreadPool threadPool;
 
 
     public AbstractRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
@@ -50,7 +51,7 @@ public class AbstractRPCClient<R,T>  {
                 Logger.info("连接[" + i + "]成功:" + host + ":" + port );
                 available.add(i);
                 availableSize = available.size();
-                socketReaders[i] = new ClientSocketReader<T>(deserializer,isAsync);
+                socketReaders[i] = new ClientSocketReader<T>(deserializer,threadPool);
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
                 socketWriters[i] = new SocketWriter<T>();
@@ -102,7 +103,7 @@ public class AbstractRPCClient<R,T>  {
                             if(socketReaders[i]!=null){
                                 socketReaders[i].close();
                             }
-                            socketReaders[i] = new ClientSocketReader<T>(deserializer,isAsync);
+                            socketReaders[i] = new ClientSocketReader<T>(deserializer,threadPool);
                             socketReaders[i].init(connections[i]);
                             socketReaders[i].start();
                             if(socketWriters[i]!=null){
