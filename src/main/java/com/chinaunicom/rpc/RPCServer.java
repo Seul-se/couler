@@ -28,6 +28,14 @@ public class RPCServer<R,T> extends Thread  {
 
     private ProcessorThread<R> processorThread;
 
+    public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer serializer){
+        this(port,threadNum,processor,serializer,serializer);
+    }
+
+    public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor, Serializer serializer){
+        this(port,threadNum,asyncProcessor,serializer,serializer);
+    }
+
     public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
         this.processorThread = new SyncProcessorThread<R,T>(processor,threadNum,serializer);

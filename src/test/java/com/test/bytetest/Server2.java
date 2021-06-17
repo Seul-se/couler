@@ -12,7 +12,7 @@ public class Server2 {
 
         Serializer<byte[][]> serializer = new MultiByteSerializer();
         MyProcessor2 processor = new MyProcessor2();
-        RPCServer<byte[][], byte[][]> server = new RPCServer<byte[][], byte[][]>(9008, 300,processor,serializer,serializer);
+        RPCServer<byte[][], byte[][]> server = new RPCServer<byte[][], byte[][]>(9008, 300,processor,serializer);
         try {
             server.open();
         } catch (IOException e) {

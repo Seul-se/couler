@@ -18,6 +18,10 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         this.isAsync = false;
     }
 
+    public SyncRPCClient(String host, int port, int connectNum, Serializer serializer){
+        this(host,port,connectNum,serializer,serializer);
+    }
+
 
     public T call(R req,int timeout) throws IOException {
         if(availableSize==0){

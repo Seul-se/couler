@@ -21,6 +21,10 @@ public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
 
     }
 
+    public AsyncRPCClient(String host, int port, int connectNum, Serializer serializer,int threadPoolSize) {
+        this(host,port,connectNum,serializer,serializer,threadPoolSize);
+    }
+
     public void call(R req, ResultCallback<T> callback) throws IOException {
         if(availableSize==0){
             throw new IOException("没有可用连接");
