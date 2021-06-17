@@ -10,7 +10,7 @@ import java.io.IOException;
 public class Server2 {
     public static void main(String[] args) {
 
-        Serializer<byte[][]> serializer = new MultiByteSerializerEncrypt("abc".getBytes());
+        Serializer<byte[][]> serializer = new MultiByteSerializer();
         MyProcessor2 processor = new MyProcessor2();
         RPCServer<byte[][], byte[][]> server = new RPCServer<byte[][], byte[][]>(9008, 300,processor,serializer,serializer);
         try {

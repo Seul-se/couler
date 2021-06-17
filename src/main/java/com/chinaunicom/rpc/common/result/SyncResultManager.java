@@ -9,12 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SyncResultManager<T> extends AbstractResultManager<T> {
 
-    protected Map<Integer,Object> waitObj = new ConcurrentHashMap<Integer,Object>();
-
-    protected Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
-
-
-
     @Override
     public void putResult(Integer id, T result){
         Object obj = waitObj.remove(id);

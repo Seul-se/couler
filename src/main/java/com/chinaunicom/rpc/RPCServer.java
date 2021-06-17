@@ -1,6 +1,9 @@
 package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.common.*;
+import com.chinaunicom.rpc.common.server.AsyncProcessorThread;
+import com.chinaunicom.rpc.common.server.ProcessorThread;
+import com.chinaunicom.rpc.common.server.SyncProcessorThread;
 import com.chinaunicom.rpc.common.socket.ServerSocketReader;
 import com.chinaunicom.rpc.common.socket.SocketWriter;
 import com.chinaunicom.rpc.entity.ServerThread;
@@ -23,17 +26,17 @@ public class RPCServer<R,T> extends Thread  {
     ServerSocket server;
 
 
-    private ProcessorThread<R,T> processorThread;
+    private ProcessorThread<R> processorThread;
 
     public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
-        this.processorThread = new ProcessorThread<R,T>(processor,threadNum,serializer);
+        this.processorThread = new SyncProcessorThread<R,T>(processor,threadNum,serializer);
         this.deserializer = deserializer;
 
     }
     public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
-        this.processorThread = new ProcessorThread<R,T>(asyncProcessor,threadNum,serializer);
+        this.processorThread = new AsyncProcessorThread<R,T>(asyncProcessor,threadNum,serializer);
         this.deserializer = deserializer;
 
     }
