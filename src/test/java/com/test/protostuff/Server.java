@@ -1,4 +1,4 @@
-package com.test;
+package com.test.protostuff;
 
 import com.chinaunicom.rpc.RPCServer;
 import com.chinaunicom.rpc.util.ProtostuffSerializer;

@@ -1,4 +1,4 @@
-package com.test;
+package com.test.protostuff;
 
 public class ResponsePojo {
     private String code;

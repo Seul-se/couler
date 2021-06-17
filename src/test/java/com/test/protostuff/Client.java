@@ -1,4 +1,4 @@
-package com.test;
+package com.test.protostuff;
 
 import com.chinaunicom.rpc.SyncRPCClient;
 import com.chinaunicom.rpc.util.ProtostuffSerializer;

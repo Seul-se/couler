@@ -1,4 +1,4 @@
-package com.test;
+package com.test.protostuff;
 
 import com.chinaunicom.rpc.intf.SyncProcessor;
 
