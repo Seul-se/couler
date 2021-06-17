@@ -10,7 +10,7 @@
 - See the code in test.
 - Server
 ```java
-RPCServer server = new RPCServer(8000,RequestPojo.class,ResponsePojo.class,200,new MyProcessor());
+RPCServer<RequestPojo, ResponsePojo> server = new RPCServer<RequestPojo, ResponsePojo>(9008, 3000,new MyProcessor(),protostuffSerializer);
 try {
     server.open();
 } catch (IOException e) {
@@ -19,8 +19,8 @@ try {
 ```
 - Client
 ```java
-RPCClient<RequestPojo,ResponsePojo> client = new RPCClient<RequestPojo,ResponsePojo>("127.0.0.1",9004,RequestPojo.class,ResponsePojo.class,5);
+SyncRPCClient<RequestPojo, ResponsePojo> client = new SyncRPCClient<RequestPojo, ResponsePojo>("localhost",9008, 5,protostuffSerializer);
 client.open();
-Message message = new Message();
-Message result = client.call(message,10000).getName();
+RequestPojo request = new RequestPojo();
+ResponsePojo response = client.call(request,10000);
 ```
