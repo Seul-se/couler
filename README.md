@@ -1,9 +1,9 @@
 # couler
 ### Stream-based high-performance RPC framework
 
-- couler is a simple and high-performance RPC framework.It use socket stream to transfer serilized object depends on protostuff.   
+- couler is a simple and high-performance RPC framework.It use socket stream to transfer serilized object.   
 - couler is so fast because of it is a pure RPC framework that has no extra features.   
-- Based on protostuff, couler can be simple and fast.Easy to use.  
+- couler can be simple and fast.Easy to use.  
 
 
 ### How to use?
