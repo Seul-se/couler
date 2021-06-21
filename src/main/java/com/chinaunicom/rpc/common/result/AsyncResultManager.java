@@ -45,9 +45,15 @@ public class AsyncResultManager<T> extends AbstractResultManager<T> {
                 if(tmp.size()>0){
                     Iterator iterator = tmp.values().iterator();
                     while (iterator.hasNext()){
-                        ResultCallback<T> resultCallback = (ResultCallback<T>)iterator.next();
+                        final ResultCallback<T> resultCallback = (ResultCallback<T>)iterator.next();
                         if(resultCallback!=null){
-                            resultCallback.onTimeout();
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    resultCallback.onTimeout();
+                                }
+                            };
+                            threadPool.submit(runnable);
                         }
                     }
                 }
