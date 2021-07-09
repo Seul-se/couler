@@ -12,10 +12,6 @@ public class AsyncResultManager<T> extends AbstractResultManager<T> {
 
     ThreadPool threadPool;
 
-    public AsyncResultManager(ThreadPool threadPool){
-        this.threadPool = threadPool;
-    }
-
     @Override
     public void putResult(Integer id, final T result){
         Object obj = waitObj.remove(id);
@@ -35,7 +31,8 @@ public class AsyncResultManager<T> extends AbstractResultManager<T> {
         }
     }
 
-    public AsyncResultManager(){
+    public AsyncResultManager(final ThreadPool threadPool){
+        this.threadPool = threadPool;
         t = new Timer();
         t.scheduleAtFixedRate(new TimerTask() {
             @Override

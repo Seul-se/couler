@@ -1,10 +1,7 @@
 package com.chinaunicom.rpc.common.result;
 
-import com.chinaunicom.rpc.entity.ResultSet;
-
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractResultManager<T> {
