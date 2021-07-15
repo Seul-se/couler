@@ -2,6 +2,7 @@ package com.chinaunicom.rpc;
 
 import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
+import com.chinaunicom.rpc.util.ByteSerializer;
 import com.chinaunicom.rpc.util.Logger;
 import com.chinaunicom.rpc.util.RandomInt;
 
@@ -22,6 +23,9 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         this(host,port,connectNum,serializer,serializer);
     }
 
+    public SyncRPCClient(String host, int port, int connectNum){
+        this(host,port,connectNum,new ByteSerializer());
+    }
 
     public T call(R req,int timeout) throws IOException {
         if(availableSize==0){

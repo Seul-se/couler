@@ -11,6 +11,7 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.AsyncProcessor;
 import com.chinaunicom.rpc.intf.SyncProcessor;
 import com.chinaunicom.rpc.intf.Serializer;
+import com.chinaunicom.rpc.util.ByteSerializer;
 import com.chinaunicom.rpc.util.Logger;
 
 import java.io.IOException;
@@ -34,6 +35,12 @@ public class RPCServer<R,T> extends Thread  {
 
     public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor, Serializer serializer){
         this(port,threadNum,asyncProcessor,serializer,serializer);
+    }
+    public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor){
+        this(port,threadNum,processor,new ByteSerializer());
+    }
+    public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor){
+        this(port,threadNum,asyncProcessor,new ByteSerializer());
     }
 
     public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer<T> serializer, Serializer<R> deserializer){
