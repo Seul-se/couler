@@ -1,5 +1,6 @@
 package com.chinaunicom.rpc;
 
+import com.chinaunicom.rpc.common.result.AbstractResultManager;
 import com.chinaunicom.rpc.common.socket.ClientSocketReader;
 import com.chinaunicom.rpc.common.socket.SocketWriter;
 import com.chinaunicom.rpc.intf.Serializer;
@@ -29,6 +30,8 @@ public class AbstractRPCClient<R,T>  {
 
     protected ThreadPool threadPool;
 
+    protected AbstractResultManager<T> resultManager;
+
 
     public AbstractRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
         this.host = host;
@@ -51,7 +54,7 @@ public class AbstractRPCClient<R,T>  {
                 Logger.info("连接[" + i + "]成功:" + host + ":" + port );
                 available.add(i);
                 availableSize = available.size();
-                socketReaders[i] = new ClientSocketReader<T>(deserializer,threadPool);
+                socketReaders[i] = new ClientSocketReader<T>(deserializer,resultManager);
                 socketReaders[i].init(connections[i]);
                 socketReaders[i].start();
                 socketWriters[i] = new SocketWriter<T>();
@@ -103,7 +106,7 @@ public class AbstractRPCClient<R,T>  {
                             if(socketReaders[i]!=null){
                                 socketReaders[i].close();
                             }
-                            socketReaders[i] = new ClientSocketReader<T>(deserializer,threadPool);
+                            socketReaders[i] = new ClientSocketReader<T>(deserializer,resultManager);
                             socketReaders[i].init(connections[i]);
                             socketReaders[i].start();
                             if(socketWriters[i]!=null){
@@ -123,7 +126,7 @@ public class AbstractRPCClient<R,T>  {
 
     AtomicInteger ids = new AtomicInteger(0);
 
-    private static final Integer MAX_ID = Integer.MAX_VALUE / 2;
+    public static final Integer MAX_ID = Integer.MAX_VALUE / 2;
 
     protected int getId(){
         int id = ids.getAndIncrement();
@@ -138,15 +141,20 @@ public class AbstractRPCClient<R,T>  {
     }
 
     public void close(){
-        t.cancel();
+        try {
+            resultManager.close();
+            t.cancel();
+        }catch (Exception e) {
+            Logger.error("resultManager关闭异常", e);
+        }
         for(int i=0;i<connectionNum;i++){
-            if(socketWriters[i]!=null) {
-                socketWriters[i].close();
-            }
-            if(socketReaders[i]!=null) {
-                socketReaders[i].close();
-            }
             try {
+                if(socketWriters[i]!=null) {
+                    socketWriters[i].close();
+                }
+                if(socketReaders[i]!=null) {
+                    socketReaders[i].close();
+                }
                 if(connections[i]!=null) {
                     connections[i].close();
                 }

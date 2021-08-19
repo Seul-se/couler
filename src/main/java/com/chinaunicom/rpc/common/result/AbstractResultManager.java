@@ -1,35 +1,47 @@
 package com.chinaunicom.rpc.common.result;
 
-import java.util.Map;
+import com.chinaunicom.rpc.entity.ResultSet;
+
 import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractResultManager<T> {
 
-    protected Map<Integer,Object> waitObj = new ConcurrentHashMap<Integer,Object>();
+    public static final int RESULT_LENGTH = 65536;
 
-    protected Map<Integer,Object> oldWaitObj = new ConcurrentHashMap<Integer,Object>();
+    public static final int COMPUTE_LENGTH = 65535;
+
+    protected AtomicReference<ResultSet>[] waitObj = new AtomicReference[RESULT_LENGTH];
 
 
-    public void putObj(Integer id,Object obj){
-        this.waitObj.put(id,obj);
+    public AbstractResultManager(){
+        for(int i = 0; i< waitObj.length; i++){
+            waitObj[i] = new AtomicReference<ResultSet>();
+        }
     }
 
-    public Object removeObj(Integer id){
-        Object o = waitObj.remove(id);
-        if(o!=null){
-            return o;
+    public boolean putObj(Integer id,ResultSet obj){
+        int index = id & COMPUTE_LENGTH;
+        if(this.waitObj[index].compareAndSet(null, obj)) {
+            return true;
         }else {
-            return oldWaitObj.remove(id);
+            ResultSet old = this.waitObj[index].get();
+            if(old!=null&&old.isTimeout()) {
+                return this.waitObj[index].compareAndSet(old, obj);
+            }
+            return false;
         }
+    }
+
+    public void removeObj(ResultSet obj){
+        int index = obj.getId() & COMPUTE_LENGTH;
+        waitObj[index].compareAndSet(obj,null);
+
     }
 
     public abstract void putResult(Integer id, T result);
 
-
-    protected Timer t;
-
     public void close(){
-        t.cancel();
+
     }
 }

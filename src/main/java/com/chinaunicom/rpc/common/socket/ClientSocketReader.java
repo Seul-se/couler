@@ -16,13 +16,9 @@ public class ClientSocketReader<T> extends SocketReader<T>{
         return  resultManager;
     }
 
-    public ClientSocketReader(Serializer<T> deserializer, ThreadPool threadPool) {
+    public ClientSocketReader(Serializer<T> deserializer, AbstractResultManager<T> resultManager) {
         super(deserializer);
-        if(threadPool!=null){
-            resultManager  = new AsyncResultManager<T>(threadPool);
-        }else{
-            resultManager  = new SyncResultManager<T>();
-        }
+        this.resultManager = resultManager;
     }
 
     @Override
@@ -54,11 +50,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
     @Override
     public void close(){
         super.close();
-        try {
-            resultManager.close();
-        }catch (Exception e) {
-            Logger.error("Socket读取线程关闭异常", e);
-        }
+
     }
 
 }

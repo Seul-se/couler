@@ -14,12 +14,14 @@
             <artifactId>protostuff-core</artifactId>
             <version>1.7.2</version>
             <optional>true</optional>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.protostuff</groupId>
             <artifactId>protostuff-runtime</artifactId>
             <version>1.7.2</version>
             <optional>true</optional>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
