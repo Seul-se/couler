@@ -2,26 +2,29 @@ package com.chinaunicom.rpc.common.result;
 
 import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.ResultCallback;
+import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
 import com.chinaunicom.rpc.util.ThreadPool;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class AsyncResultManager<T> extends AbstractResultManager<T> {
+public class AsyncResultManager<T> extends AbstractResultManager {
 
     ThreadPool threadPool;
 
+    private Serializer<T> deserializer;
+
     @Override
-    public void putResult(Integer id, final T result){
+    public void putResult(Integer id, final byte[] result){
         int index = id & COMPUTE_LENGTH;
-        ResultSet obj = waitObj[index].get();
+        ResultSet obj = frameObj[index].get();
         if(obj!=null&&obj.getId() == id.intValue()){
-            waitObj[index].compareAndSet(obj,null);
+            frameObj[index].compareAndSet(obj,null);
             final ResultCallback<T> resultCallback = (ResultCallback<T>)obj.getResult();
             Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
-                    resultCallback.onSuccess(result);
+                    resultCallback.onSuccess(deserializer.deserialize(result));
                 }
             };
             threadPool.submit(runnable);
@@ -52,7 +55,8 @@ public class AsyncResultManager<T> extends AbstractResultManager<T> {
     private Object synObj = new Object();
     Thread checkThread;
 
-    public AsyncResultManager(final ThreadPool threadPool){
+    public AsyncResultManager(final ThreadPool threadPool, Serializer<T> deserializer){
+        this.deserializer = deserializer;
         this.threadPool = threadPool;
         checkThread = new Thread(){
             @Override
@@ -60,7 +64,7 @@ public class AsyncResultManager<T> extends AbstractResultManager<T> {
                 while(isRun){
                     try {
                         boolean isEmpty = true;
-                        for (AtomicReference<ResultSet> atomicReference : waitObj) {
+                        for (AtomicReference<ResultSet> atomicReference : frameObj) {
                             ResultSet resultSet = atomicReference.get();
                             if (resultSet != null) {
                                 isEmpty = false;

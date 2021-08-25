@@ -1,23 +1,18 @@
 package com.chinaunicom.rpc.common.socket;
 
 import com.chinaunicom.rpc.common.result.AbstractResultManager;
-import com.chinaunicom.rpc.common.result.AsyncResultManager;
-import com.chinaunicom.rpc.common.result.SyncResultManager;
-import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
-import com.chinaunicom.rpc.util.ThreadPool;
 
-public class ClientSocketReader<T> extends SocketReader<T>{
+public class ClientSocketReader extends SocketReader{
 
 
-    private AbstractResultManager<T> resultManager;
+    private AbstractResultManager resultManager;
 
-    public AbstractResultManager<T> getResultManager(){
+    public AbstractResultManager getResultManager(){
         return  resultManager;
     }
 
-    public ClientSocketReader(Serializer<T> deserializer, AbstractResultManager<T> resultManager) {
-        super(deserializer);
+    public ClientSocketReader(AbstractResultManager resultManager) {
         this.resultManager = resultManager;
     }
 
@@ -38,8 +33,7 @@ public class ClientSocketReader<T> extends SocketReader<T>{
                 if (data == null) {
                     continue;
                 }
-                T result = deserializer.deserialize(data);
-                resultManager.putResult(id, result);
+                resultManager.putResult(id, data);
             }catch (Exception e){
                 Logger.error("Socket读取线程异常", e);
             }

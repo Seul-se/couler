@@ -15,19 +15,22 @@ public class SyncProcessorThread<R,T> implements ProcessorThread<R> {
 
     ThreadPool threadPool;
 
-    public SyncProcessorThread(SyncProcessor<R,T> processor, int poolSize, Serializer<T> serializer){
+    Serializer<R> deserializer;
+
+    public SyncProcessorThread(SyncProcessor<R,T> processor, int poolSize, Serializer<T> serializer,Serializer<R> deserializer){
         this.processor = processor;
         this.threadPool = new ThreadPool(poolSize);
         this.serializer = serializer;
+        this.deserializer = deserializer;
     }
 
 
     @Override
-    public void add(final Task<R> task) {
+    public void add(final Task task) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                T result = processor.process(task.getData());
+                T result = processor.process(deserializer.deserialize(task.getData()));
                 byte[] resultData = serializer.serialize(result);
                 ServerThread serverThread = task.getServerThread();
                 serverThread.getSocketWriter().write(resultData, task.getId());

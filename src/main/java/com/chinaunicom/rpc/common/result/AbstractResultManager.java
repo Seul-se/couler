@@ -1,33 +1,31 @@
 package com.chinaunicom.rpc.common.result;
 
 import com.chinaunicom.rpc.entity.ResultSet;
-
-import java.util.Timer;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class AbstractResultManager<T> {
+public abstract class AbstractResultManager {
 
     public static final int RESULT_LENGTH = 65536;
 
     public static final int COMPUTE_LENGTH = 65535;
 
-    protected AtomicReference<ResultSet>[] waitObj = new AtomicReference[RESULT_LENGTH];
+    protected AtomicReference<ResultSet>[] frameObj = new AtomicReference[RESULT_LENGTH];
 
 
     public AbstractResultManager(){
-        for(int i = 0; i< waitObj.length; i++){
-            waitObj[i] = new AtomicReference<ResultSet>();
+        for(int i = 0; i< frameObj.length; i++){
+            frameObj[i] = new AtomicReference<ResultSet>();
         }
     }
 
     public boolean putObj(Integer id,ResultSet obj){
         int index = id & COMPUTE_LENGTH;
-        if(this.waitObj[index].compareAndSet(null, obj)) {
+        if(this.frameObj[index].compareAndSet(null, obj)) {
             return true;
         }else {
-            ResultSet old = this.waitObj[index].get();
+            ResultSet old = this.frameObj[index].get();
             if(old!=null&&old.isTimeout()) {
-                return this.waitObj[index].compareAndSet(old, obj);
+                return this.frameObj[index].compareAndSet(old, obj);
             }
             return false;
         }
@@ -35,11 +33,11 @@ public abstract class AbstractResultManager<T> {
 
     public void removeObj(ResultSet obj){
         int index = obj.getId() & COMPUTE_LENGTH;
-        waitObj[index].compareAndSet(obj,null);
+        frameObj[index].compareAndSet(obj,null);
 
     }
 
-    public abstract void putResult(Integer id, T result);
+    public abstract void putResult(Integer id, byte[] result);
 
     public void close(){
 

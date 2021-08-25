@@ -8,15 +8,20 @@ public class RingBuffer<T> {
 
     private final int queueNum;
 
+    private final int computeNum;
+
     private final AtomicInteger index = new AtomicInteger();
 
     private final AtomicReference<T>[] arrayQueue;
 
     private int cursor = 0 ;
 
+    private AtomicInteger size = new AtomicInteger();
+
 
     public RingBuffer(int queueNum){
         this.queueNum = queueNum;
+        this.computeNum = queueNum - 1;
         arrayQueue = new AtomicReference[queueNum];
         for(int i=0;i<arrayQueue.length;i++){
             arrayQueue[i] = new AtomicReference<T>();
@@ -27,16 +32,16 @@ public class RingBuffer<T> {
         if(obj == null){
             throw new RuntimeException("Object is null");
         }
-        int index = this.index.getAndIncrement();
-        if((index-queueNum)>=cursor||!arrayQueue[index%queueNum].compareAndSet(null,obj)){
-            throw new IOException("Queue is full");
+        while (size.get() < queueNum){
+            int index = this.index.getAndIncrement();
+            if(arrayQueue[index & queueNum].compareAndSet(null,obj)){
+                size.incrementAndGet();
+                return;
+            }
         }
     }
 
     public T poll(){
-        if(cursor >= index.get()){
-           return null;
-        }
         if(cursor >= queueNum){
             cursor -=queueNum;
             index.getAndAdd(-queueNum);

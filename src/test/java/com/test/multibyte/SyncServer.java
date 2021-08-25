@@ -11,7 +11,7 @@ public class SyncServer {
 
         Serializer<byte[][]> serializer = new MultiByteSerializer();
         MyProcessorSync processor = new MyProcessorSync();
-        RPCServer<byte[], byte[]> server = new RPCServer<byte[], byte[]>(9008, 300,processor);
+        RPCServer<byte[][], byte[][]> server = new RPCServer<byte[][], byte[][]>(9008, 3000,processor,serializer);
         try {
             server.open();
         } catch (IOException e) {

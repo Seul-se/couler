@@ -3,22 +3,24 @@ package com.chinaunicom.rpc.common.socket;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
-public abstract class SocketReader<T> extends Thread{
+public abstract class SocketReader extends Thread{
 
 
     private static final int HEAD = 255;
     Socket socket;
     InputStream in;
     boolean run = true;
-    protected Serializer<T> deserializer;
 
-    public SocketReader(Serializer<T> deserializer){
-        this.deserializer = deserializer;
+    Closeable closeable;
+
+    public void setCloseable(Closeable closeable){
+        this.closeable = closeable;
     }
 
 
@@ -101,7 +103,6 @@ public abstract class SocketReader<T> extends Thread{
 
 
     public void close(){
-        Logger.info("Socket读取线程关闭:" + Thread.currentThread().getName());
             run = false;
         if (this.in != null) {
             try {
@@ -115,6 +116,15 @@ public abstract class SocketReader<T> extends Thread{
                 socket.close();
             } catch (Exception e) {
                 Logger.error("Socket读取线程关闭异常", e);
+            }
+        }
+        if(closeable!=null){
+            try {
+                Closeable tmp = closeable;
+                closeable = null;
+                tmp.close();
+            } catch (IOException e) {
+                Logger.error("Socket写入线程关闭异常", e);
             }
         }
     }

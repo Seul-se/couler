@@ -6,12 +6,15 @@ import com.chinaunicom.rpc.entity.Task;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
 
-public class ServerSocketReader<R>  extends SocketReader<R>{
+public class ServerSocketReader<R>  extends SocketReader{
 
     RPCServer<R,Object> server;
     ServerThread serverThread;
+
+    Serializer<R> deserializer;
+
     public ServerSocketReader(Serializer<R> deserializer, RPCServer server, ServerThread serverThread) {
-        super(deserializer);
+        this.deserializer = deserializer;
         this.server = server;
         this.serverThread = serverThread;
         this.deserializer = deserializer;
@@ -35,8 +38,8 @@ public class ServerSocketReader<R>  extends SocketReader<R>{
                 if (data == null) {
                     continue;
                 }
-                R result = deserializer.deserialize(data);
-                server.putTask(new Task<R>(id, result, serverThread));
+//                R result = deserializer.deserialize(data);
+                server.putTask(new Task(id, data, serverThread));
             }catch (Exception e){
                 Logger.error("Socket读取线程异常", e);
             }

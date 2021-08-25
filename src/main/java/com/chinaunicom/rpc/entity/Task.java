@@ -1,14 +1,14 @@
 package com.chinaunicom.rpc.entity;
 
-public class Task<T> {
+public class Task {
 
     private Integer id;
 
     private ServerThread serverThread;
 
-    private T data;
+    private byte[] data;
 
-    public Task(Integer id,T data,ServerThread serverThread){
+    public Task(Integer id,byte[] data,ServerThread serverThread){
         this.id = id ;
         this.data = data;
         this.serverThread = serverThread;
@@ -22,11 +22,11 @@ public class Task<T> {
         this.id = id;
     }
 
-    public T getData() {
+    public byte[] getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(byte[] data) {
         this.data = data;
     }
 

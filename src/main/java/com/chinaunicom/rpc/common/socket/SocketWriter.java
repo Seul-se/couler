@@ -3,6 +3,7 @@ package com.chinaunicom.rpc.common.socket;
 import com.chinaunicom.rpc.util.Byte2Int;
 import com.chinaunicom.rpc.util.Logger;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -11,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
-public class SocketWriter<T> extends Thread {
+public class SocketWriter extends Thread {
 
     private ConcurrentLinkedQueue<byte[][]> queue = new ConcurrentLinkedQueue<byte[][]>();
 
@@ -21,7 +22,11 @@ public class SocketWriter<T> extends Thread {
     OutputStream out ;
     boolean run = true;
     AtomicBoolean isWait = new AtomicBoolean(false);
+    Closeable closeable;
 
+    public void setCloseable(Closeable closeable){
+        this.closeable = closeable;
+    }
 
 
     public void write(byte[] data,Integer id){
@@ -84,7 +89,6 @@ public class SocketWriter<T> extends Thread {
 
 
     public void close(){
-        Logger.info("Socket写入线程关闭:" + Thread.currentThread().getName());
         run = false;
         LockSupport.unpark(this);
         if (this.out != null) {
@@ -102,6 +106,15 @@ public class SocketWriter<T> extends Thread {
             }
         }
 
+        if(closeable!=null){
+            try {
+                Closeable tmp = closeable;
+                closeable = null;
+                tmp.close();
+            } catch (IOException e) {
+                Logger.error("Socket写入线程关闭异常", e);
+            }
+        }
     }
 
 }

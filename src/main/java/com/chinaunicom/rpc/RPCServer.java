@@ -45,18 +45,18 @@ public class RPCServer<R,T> extends Thread  {
 
     public RPCServer(int port, int threadNum, SyncProcessor<R,T> processor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
-        this.processorThread = new SyncProcessorThread<R,T>(processor,threadNum,serializer);
+        this.processorThread = new SyncProcessorThread<R,T>(processor,threadNum,serializer,deserializer);
         this.deserializer = deserializer;
 
     }
     public RPCServer(int port, int threadNum, AsyncProcessor<R,T> asyncProcessor, Serializer<T> serializer, Serializer<R> deserializer){
         this.port = port;
-        this.processorThread = new AsyncProcessorThread<R,T>(asyncProcessor,threadNum,serializer);
+        this.processorThread = new AsyncProcessorThread<R,T>(asyncProcessor,threadNum,serializer,deserializer);
         this.deserializer = deserializer;
 
     }
 
-    public void putTask(Task<R> t){
+    public void putTask(Task t){
         processorThread.add(t);
     }
     public void open() throws IOException {
@@ -75,7 +75,7 @@ public class RPCServer<R,T> extends Thread  {
                 Logger.error("建立连接异常" ,e );
             }
             Logger.info("建立连接:" + socket.getRemoteSocketAddress().toString() );
-            SocketWriter<R> socketWriter = new SocketWriter<R>();
+            SocketWriter socketWriter = new SocketWriter();
             socketWriter.init(socket);
             socketWriter.start();
             ServerThread serverThread = new ServerThread();

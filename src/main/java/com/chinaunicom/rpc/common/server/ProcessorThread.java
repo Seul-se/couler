@@ -4,5 +4,5 @@ import com.chinaunicom.rpc.entity.Task;
 
 public interface ProcessorThread<R> {
 
-    void add(Task<R> task);
+    void add(Task task);
 }

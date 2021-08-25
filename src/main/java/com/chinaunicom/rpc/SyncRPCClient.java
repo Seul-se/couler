@@ -4,6 +4,7 @@ import com.chinaunicom.rpc.common.result.SyncResultManager;
 import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.ByteSerializer;
+import com.chinaunicom.rpc.util.ConnectionManager;
 import com.chinaunicom.rpc.util.Logger;
 import com.chinaunicom.rpc.util.RandomInt;
 
@@ -12,26 +13,27 @@ import java.io.IOException;
 public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
 
 
-    public SyncRPCClient(String host, int port, int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
-        super(host,port,connectNum,serializer,deserializer);
-        this.resultManager = new SyncResultManager<T>();
+    public SyncRPCClient( int connectNum, Serializer<R> serializer, Serializer<T> deserializer){
+        super(connectNum,serializer,deserializer);
+        this.resultManager = new SyncResultManager();
+        this.connectionManager = new ConnectionManager(connectionNum,resultManager);
     }
 
-    public SyncRPCClient(String host, int port, int connectNum, Serializer serializer){
-        this(host,port,connectNum,serializer,serializer);
+    public SyncRPCClient( int connectNum, Serializer serializer){
+        this(connectNum,serializer,serializer);
     }
 
-    public SyncRPCClient(String host, int port, int connectNum){
-        this(host,port,connectNum,new ByteSerializer());
+    public SyncRPCClient( int connectNum){
+        this(connectNum,new ByteSerializer());
     }
 
-    public T call(R req,int timeout) throws IOException {
-        if(availableSize==0){
-            throw new IOException("没有可用连接");
-        }
-        int rand = RandomInt.randomInt(availableSize);
-        int i = available.get(rand);
-        ResultSet<T> syncObj = new ResultSet<T>(timeout);
+    public T call(String host, int port ,R req,int timeout) throws IOException {
+//        if(availableSize==0){
+//            throw new IOException("没有可用连接");
+//        }
+//        int rand = RandomInt.randomInt(availableSize);
+//        int i = available.get(rand);
+        ResultSet<byte[]> syncObj = new ResultSet<byte[]>(timeout);
         int id;
         boolean isWrite = false;
         while(true) {
@@ -41,7 +43,8 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
                 if(resultManager.putObj(id, syncObj)){
                     isWrite = true;
                     synchronized (syncObj) {
-                        socketWriters[i].write(serializer.serialize(req), id);
+//                        socketWriters[i].write(serializer.serialize(req), id);
+                        connectionManager.send(host,port,serializer.serialize(req), id);
                         syncObj.wait(timeout);
                     }
                     break;
@@ -55,9 +58,9 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
                 }
             }
         }
-        T rsp = syncObj.getResult();
+        byte[] rsp = syncObj.getResult();
         if (rsp != null) {
-            return rsp;
+            return deserializer.deserialize(rsp);
         } else {
             throw new IOException("获取返回结果超时 id:" + id);
         }
