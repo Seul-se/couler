@@ -6,7 +6,6 @@ import com.chinaunicom.rpc.intf.ResultCallback;
 import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.ByteSerializer;
 import com.chinaunicom.rpc.util.ConnectionManager;
-import com.chinaunicom.rpc.util.RandomInt;
 import com.chinaunicom.rpc.util.ThreadPool;
 
 import java.io.IOException;
@@ -30,11 +29,6 @@ public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
     }
 
     public void call(String host , int port, R req, ResultCallback<T> callback,int timeout) throws IOException {
-//        if(availableSize==0){
-//            throw new IOException("没有可用连接");
-//        }
-//        int rand = RandomInt.randomInt(availableSize);
-//        int i = available.get(rand);
         int id;
         ResultSet resultSet = new ResultSet(timeout);
         resultSet.setResult(callback);
@@ -42,7 +36,6 @@ public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
             id = getId();
             resultSet.setId(id);
             if(resultManager.putObj(id, resultSet)) {
-//                socketWriters[i].write(serializer.serialize(req), id);
                 connectionManager.send(host,port,serializer.serialize(req), id);
                 break;
             }

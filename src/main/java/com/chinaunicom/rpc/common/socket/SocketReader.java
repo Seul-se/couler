@@ -1,6 +1,5 @@
 package com.chinaunicom.rpc.common.socket;
 
-import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.Logger;
 
 import java.io.Closeable;

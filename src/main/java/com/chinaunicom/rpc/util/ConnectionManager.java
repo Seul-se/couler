@@ -8,10 +8,14 @@ import com.chinaunicom.rpc.common.socket.SocketWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ConnectionManager {
+
+    private static final int CONNECT_IDE_TIME = 60000;
 
     private int connectionNum;
 
@@ -50,6 +54,9 @@ public class ConnectionManager {
             }
         }
         connection.write(message,id);
+        if(isCancel){
+            autoClean();
+        }
 
     }
 
@@ -63,11 +70,64 @@ public class ConnectionManager {
                 }
             }
         }
+        t.cancel();
+        isCancel = true;
+    }
+
+    private Lock synObj = new ReentrantLock();
+    private boolean isCancel = true;
+    private Timer t;
+    private List<Connection> ready2Close = new LinkedList<Connection>();
+    private void autoClean(){
+        synObj.lock();
+        if(isCancel) {
+            isCancel = false;
+            t = new Timer();
+            t.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    for (Connection connection : ready2Close) {
+                        connection.close();
+                    }
+                    ready2Close.clear();
+                    if (connectionMap.isEmpty()) {
+                        this.cancel();
+                        isCancel = true;
+                        return;
+                    }
+                    Iterator<Connection[]> iterator = connectionMap.values().iterator();
+                    while (iterator.hasNext()) {
+                        Connection[] connections = iterator.next();
+                        boolean isEmpty = true;
+                        for (int i = 0; i < connections.length; i++) {
+                            if (connections[i] != null) {
+                                if (connections[i].getLastActiveTime() + CONNECT_IDE_TIME < TimeUtil.getTime()) {
+                                    synchronized (connections) {
+                                        ready2Close.add(connections[i]);
+                                        connections[i] = null;
+                                    }
+                                } else {
+                                    isEmpty = false;
+                                }
+                            }
+                        }
+                        if (isEmpty) {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }, CONNECT_IDE_TIME, CONNECT_IDE_TIME);
+        }
+        synObj.unlock();
     }
 
 
     static class Connection implements Closeable{
 
+
+
+
+        private long lastActiveTime;
 
         private SocketWriter socketWriter;
 
@@ -83,18 +143,23 @@ public class ConnectionManager {
 
         private boolean avaliable = false;
 
+        public long getLastActiveTime() {
+            return lastActiveTime;
+        }
 
         public Connection(String host, int port,AbstractResultManager resultManager) throws IOException {
             this.host = host;
             this.port = port;
             this.resultManager = resultManager;
             connect();
+            lastActiveTime = TimeUtil.getTime();
         }
 
 
 
         public void write(byte[] data,int id){
             socketWriter.write(data,id);
+            lastActiveTime = TimeUtil.getTime();
         }
 
         public boolean isAvaliable(){

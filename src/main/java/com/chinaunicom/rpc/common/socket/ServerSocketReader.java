@@ -38,7 +38,6 @@ public class ServerSocketReader<R>  extends SocketReader{
                 if (data == null) {
                     continue;
                 }
-//                R result = deserializer.deserialize(data);
                 server.putTask(new Task(id, data, serverThread));
             }catch (Exception e){
                 Logger.error("Socket读取线程异常", e);

@@ -12,7 +12,6 @@ public class ProtostuffSerializer<T> implements Serializer<T> {
     /**
      * 避免每次序列化都重新申请Buffer空间
      */
-//    private static LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
 
     private Schema<T> schema;
 

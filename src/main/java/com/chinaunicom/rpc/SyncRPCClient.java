@@ -6,7 +6,6 @@ import com.chinaunicom.rpc.intf.Serializer;
 import com.chinaunicom.rpc.util.ByteSerializer;
 import com.chinaunicom.rpc.util.ConnectionManager;
 import com.chinaunicom.rpc.util.Logger;
-import com.chinaunicom.rpc.util.RandomInt;
 
 import java.io.IOException;
 
@@ -28,11 +27,6 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
     }
 
     public T call(String host, int port ,R req,int timeout) throws IOException {
-//        if(availableSize==0){
-//            throw new IOException("没有可用连接");
-//        }
-//        int rand = RandomInt.randomInt(availableSize);
-//        int i = available.get(rand);
         ResultSet<byte[]> syncObj = new ResultSet<byte[]>(timeout);
         int id;
         boolean isWrite = false;
@@ -43,7 +37,6 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
                 if(resultManager.putObj(id, syncObj)){
                     isWrite = true;
                     synchronized (syncObj) {
-//                        socketWriters[i].write(serializer.serialize(req), id);
                         connectionManager.send(host,port,serializer.serialize(req), id);
                         syncObj.wait(timeout);
                     }
