@@ -44,6 +44,11 @@ public class ConnectionManager {
         Connection connection = connections[rand];
         if(connection == null||!connection.isAvaliable()){
             synchronized (connections){
+                //如果此时connections被清理，需要重新初始化
+                if(!connectionMap.containsValue(connections)){
+                    connections = new Connection[connectionNum];
+                    connectionMap.put(key,connections);
+                }
                 connection = connections[rand];
                 if(connection == null){
                     connection = new Connection(host,port,resultManager);
@@ -112,7 +117,16 @@ public class ConnectionManager {
                             }
                         }
                         if (isEmpty) {
-                            iterator.remove();
+                            synchronized (connections) {
+                                for(Connection connection:connections) {
+                                    if(connection!=null){
+                                        isEmpty = false;
+                                    }
+                                }
+                                if(isEmpty) {
+                                    iterator.remove();
+                                }
+                            }
                         }
                     }
                 }
