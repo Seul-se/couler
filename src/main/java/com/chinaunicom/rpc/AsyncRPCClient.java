@@ -1,5 +1,6 @@
 package com.chinaunicom.rpc;
 
+import com.chinaunicom.rpc.common.result.AbstractResultManager;
 import com.chinaunicom.rpc.common.result.AsyncResultManager;
 import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.ResultCallback;
@@ -32,15 +33,18 @@ public class AsyncRPCClient<R,T> extends AbstractRPCClient<R,T> {
         int id;
         ResultSet resultSet = new ResultSet(timeout);
         resultSet.setResult(callback);
-        while(true) {
+        int i = 0;
+        while(i < AbstractResultManager.RESULT_LENGTH) {
+            i++;
             id = getId();
             resultSet.setId(id);
             if(resultManager.putObj(id, resultSet)) {
                 connectionManager.send(host,port,serializer.serialize(req), id);
-                break;
+                return;
             }
             Thread.yield();
         }
+        throw new IOException("发送队列已满");
     }
 
 

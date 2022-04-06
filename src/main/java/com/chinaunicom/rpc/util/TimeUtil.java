@@ -29,11 +29,14 @@ public class TimeUtil {
                 while (true) {
                     try {
                         currentTime = System.currentTimeMillis();
+                        for(int i=0;i<SYN_PERIOD;i++){
+                            currentTime++;
+                            Thread.sleep(1);
+                        }
                         ideCount++;
                         if(ideCount > IDE_COUNT){
                             break;
                         }
-                        Thread.sleep(SYN_PERIOD);
                     } catch (Exception e) {
                         break;
                     }

@@ -1,5 +1,6 @@
 package com.chinaunicom.rpc;
 
+import com.chinaunicom.rpc.common.result.AbstractResultManager;
 import com.chinaunicom.rpc.common.result.SyncResultManager;
 import com.chinaunicom.rpc.entity.ResultSet;
 import com.chinaunicom.rpc.intf.Serializer;
@@ -28,9 +29,11 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
 
     public T call(String host, int port ,R req,int timeout) throws IOException {
         ResultSet<byte[]> syncObj = new ResultSet<byte[]>(timeout);
-        int id;
+        int id = -1;
         boolean isWrite = false;
-        while(true) {
+        int i = 0;
+        while(i < AbstractResultManager.RESULT_LENGTH) {
+            i++;
             id = getId();
             syncObj.setId(id);
             try {
@@ -55,6 +58,9 @@ public class SyncRPCClient<R,T> extends AbstractRPCClient<R,T>  {
         if (rsp != null) {
             return deserializer.deserialize(rsp);
         } else {
+            if(i >= AbstractResultManager.RESULT_LENGTH){
+                throw new IOException("发送队列已满:" + id);
+            }
             throw new IOException("获取返回结果超时 id:" + id);
         }
     }

@@ -30,6 +30,9 @@ public class MultiByteSerializer implements Serializer<byte[][]> {
         byte[] len = new byte[4];
         System.arraycopy(data,0,len,0,4);
         int dataNum = Byte2Int.byteArrayToInt(len);
+        if(dataNum > data.length){
+            throw new RuntimeException("反序列化失败，数据长度超长:" + new String(data));
+        }
         int index = 4;
         int length;
         byte[][] result = new byte[dataNum][];
@@ -37,6 +40,9 @@ public class MultiByteSerializer implements Serializer<byte[][]> {
             System.arraycopy(data,index,len,0,4);
             index +=4;
             length = Byte2Int.byteArrayToInt(len);
+            if(length > (data.length - index)){
+                throw new RuntimeException("反序列化失败，数据长度超长:" + new String(data));
+            }
             byte[] one = new byte[length];
             System.arraycopy(data,index,one,0,length);
             index += length;
